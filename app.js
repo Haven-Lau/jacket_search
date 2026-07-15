@@ -30,6 +30,7 @@ let maskConfigs = {}; // Stores configuration and pre-normalized DB per mask
 let activeMaskName = "5-dot";
 let isLiveFeed = true;
 let sessionTopMatches = [];
+let isFrozen = false;
 let videoStream = null;
 let processingInterval = null;
 
@@ -46,6 +47,13 @@ const loadingText = document.getElementById("loading-text");
 const matchCountBadge = document.getElementById("match-count-badge");
 const statusOverlay = document.getElementById("status-overlay");
 const clearMatchesBtn = document.getElementById("clear-matches-btn");
+const freezeBtn = document.getElementById("freeze-btn");
+
+freezeBtn.addEventListener("click", () => {
+    isFrozen = !isFrozen;
+    freezeBtn.textContent = isFrozen ? "Unfreeze" : "Freeze";
+    freezeBtn.className = isFrozen ? "btn primary-btn btn-sm" : "btn outline-btn btn-sm";
+});
 
 clearMatchesBtn.addEventListener("click", () => {
     sessionTopMatches = [];
@@ -205,7 +213,7 @@ async function initDatabase() {
         const indexRes = await fetch("jacket_index.json");
         if (!indexRes.ok) throw new Error("Failed to load jacket_index.json");
         jacketNames = await indexRes.json();
-        matchCountBadge.textContent = `${jacketNames.length} DB`;
+        matchCountBadge.textContent = `${jacketNames.length}`;
         
         loadingText.textContent = "Fetching URLs mapping...";
         const urlRes = await fetch("jacket_urls.txt");
@@ -412,7 +420,7 @@ function drawOverlay() {
     const w = overlayCanvas.width, h = overlayCanvas.height;
     overlayCtx.clearRect(0, 0, w, h);
     
-    const boxSize = Math.min(w, h) * 0.85;
+    const boxSize = Math.min(w, h);
     const bx = (w - boxSize) / 2, by = (h - boxSize) / 2;
     
     overlayCtx.strokeStyle = "rgba(99, 102, 241, 0.5)";
@@ -430,12 +438,12 @@ function drawOverlay() {
 
 // 4. Query Processing & NCC Match
 function processQueryFrame() {
-    if (!databaseLoaded || !isLiveFeed) return;
+    if (!databaseLoaded || !isLiveFeed || isFrozen) return;
     
     const vw = video.videoWidth, vh = video.videoHeight;
     if (vw === 0 || vh === 0) return;
     
-    const boxSize = Math.min(vw, vh) * 0.85;
+    const boxSize = Math.min(vw, vh);
     const sx = (vw - boxSize) / 2, sy = (vh - boxSize) / 2;
     offCtx.drawImage(video, sx, sy, boxSize, boxSize, 0, 0, 224, 224);
     
@@ -445,8 +453,6 @@ function processQueryFrame() {
 function showStatus(msg) {
     statusOverlay.textContent = msg;
     statusOverlay.classList.remove("hidden");
-    // clear matches
-    matchesList.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${msg}</p></div>`;
 }
 
 function runMatchingPipeline() {

@@ -350,12 +350,10 @@ h1, h2, h3, .logo-text {
 }
 
 .match-name {
-    font-weight: 600;
-    font-size: 1.05rem;
-    margin-bottom: 0.4rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 700;
+    font-size: 1.1rem;
+    white-space: normal;
+    word-break: break-word;
     max-width: 100%;
 }
 
