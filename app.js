@@ -28,6 +28,8 @@ let databaseLoaded = false;
 let spriteCanvas = null; // Holds the 2560x8280 sprite
 let maskConfigs = {}; // Stores configuration and pre-normalized DB per mask
 let activeMaskName = "5-dot";
+let isLiveFeed = true;
+let sessionTopMatches = [];
 let videoStream = null;
 let processingInterval = null;
 
@@ -43,17 +45,15 @@ const loadingOverlay = document.getElementById("loading-overlay");
 const loadingText = document.getElementById("loading-text");
 const matchCountBadge = document.getElementById("match-count-badge");
 const statusOverlay = document.getElementById("status-overlay");
+const clearMatchesBtn = document.getElementById("clear-matches-btn");
 
-// Diagnostic Canvases (Created in JS now)
-const debugQueryCanvas = document.createElement("canvas");
-debugQueryCanvas.width = GRID_W;
-debugQueryCanvas.height = GRID_H;
-const dqCtx = debugQueryCanvas.getContext("2d", { willReadFrequently: true });
-
-const debugRefCanvas = document.createElement("canvas");
-debugRefCanvas.width = GRID_W;
-debugRefCanvas.height = GRID_H;
-const drCtx = debugRefCanvas.getContext("2d", { willReadFrequently: true });
+clearMatchesBtn.addEventListener("click", () => {
+    sessionTopMatches = [];
+    matchesList.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <p>Waiting for clear visual feed...</p>
+    </div>`;
+});
 
 // Offscreen canvas for fast video frame extraction
 const offscreenCanvas = document.createElement("canvas");
@@ -429,8 +429,6 @@ function drawOverlay() {
 }
 
 // 4. Query Processing & NCC Match
-let isLiveFeed = true;
-
 function processQueryFrame() {
     if (!databaseLoaded || !isLiveFeed) return;
     
@@ -513,6 +511,10 @@ function runMatchingPipeline() {
     const warpedData = warpAffineNearest(imgData, 224, 224, M);
     
     // 5. Build 80x120 Query Grid
+    const qCanvas = document.createElement("canvas");
+    qCanvas.width = GRID_W; qCanvas.height = GRID_H;
+    const dqCtx = qCanvas.getContext("2d", { willReadFrequently: true });
+    
     dqCtx.fillStyle = "#000"; dqCtx.fillRect(0, 0, GRID_W, GRID_H);
     
     // Temporarily write warped data back to offscreen to drawImage crop
@@ -591,79 +593,106 @@ function runMatchingPipeline() {
     }
     
     similarityResults.sort((a, b) => b.score - a.score);
-    renderMatches(similarityResults.slice(0, 1));
+    const topCurrent = similarityResults.slice(0, 5);
+    
+    let updated = false;
+    for (const match of topCurrent) {
+        if (match.score < 0.6) continue; // Filter bad matches
+        const existing = sessionTopMatches.find(m => m.name === match.name);
+        if (existing) {
+            if (match.score > existing.score) {
+                existing.score = match.score;
+                existing.queryImageData = new ImageData(new Uint8ClampedArray(queryGridData.data), GRID_W, GRID_H);
+                updated = true;
+            }
+        } else {
+            match.queryImageData = new ImageData(new Uint8ClampedArray(queryGridData.data), GRID_W, GRID_H);
+            sessionTopMatches.push(match);
+            updated = true;
+        }
+    }
+    
+    if (updated || (!isLiveFeed && sessionTopMatches.length === 0)) {
+        sessionTopMatches.sort((a, b) => b.score - a.score);
+        sessionTopMatches = sessionTopMatches.slice(0, 3);
+        renderMatches(sessionTopMatches);
+    }
 }
 
 function renderMatches(topMatches) {
     matchesList.innerHTML = "";
     
-    if (topMatches.length === 0) return;
-    const match = topMatches[0];
-    const scorePercentage = Math.max(0, Math.min(100, match.score * 100));
-    
-    drawRefGridToCanvas(match.index);
-    
-    const thumbUrl = jacketUrlMap[match.name] || `jackets/${encodeURIComponent(match.name)}`;
-    
-    const matchItem = document.createElement("div");
-    matchItem.className = `match-item rank-1`;
-    
-    const topRow = document.createElement("div");
-    topRow.className = "match-top-row";
-    topRow.innerHTML = `
-        <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
-        <div class="match-info">
-            <div class="match-name" title="${match.name}">${match.name}</div>
-            <div class="score-container">
-                <div class="score-bar-bg">
-                    <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
-                </div>
-                <div class="score-text">${match.score.toFixed(4)}</div>
-            </div>
-        </div>
-    `;
-    
-    const diagRow = document.createElement("div");
-    diagRow.className = "match-diagnostic-row";
-    
-    const qContainer = document.createElement("div");
-    qContainer.className = "diag-canvas-container";
-    qContainer.innerHTML = '<span class="diag-canvas-label">Query</span>';
-    qContainer.appendChild(debugQueryCanvas);
-    
-    const rContainer = document.createElement("div");
-    rContainer.className = "diag-canvas-container";
-    rContainer.innerHTML = '<span class="diag-canvas-label">Match</span>';
-    rContainer.appendChild(debugRefCanvas);
-    
-    diagRow.appendChild(qContainer);
-    diagRow.appendChild(rContainer);
-    
-    matchItem.appendChild(topRow);
-    matchItem.appendChild(diagRow);
-    
-    matchesList.appendChild(matchItem);
-}
-
-function drawRefGridToCanvas(jacketIdx) {
-    if (!spriteCanvas) return;
-    const col = jacketIdx % SPRITE_COLS;
-    const row = Math.floor(jacketIdx / SPRITE_COLS);
-    
-    drCtx.fillStyle = "#000"; drCtx.fillRect(0, 0, GRID_W, GRID_H);
-    drCtx.drawImage(spriteCanvas, col * GRID_W, row * GRID_H, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
-    
-    // Apply visual black mask
-    const config = maskConfigs[activeMaskName];
-    if (config) {
-        const refGridData = drCtx.getImageData(0, 0, GRID_W, GRID_H);
-        for (let i = 0; i < GRID_W * GRID_H; i++) {
-            if (!config.eroded80x120[i]) {
-                refGridData.data[i*4] = 0; refGridData.data[i*4+1] = 0; refGridData.data[i*4+2] = 0;
-            }
-        }
-        drCtx.putImageData(refGridData, 0, 0);
+    if (topMatches.length === 0) {
+        matchesList.innerHTML = `<div class="empty-state">
+            <div class="empty-icon">🧥</div>
+            <p>No high-confidence matches yet.</p>
+        </div>`;
+        return;
     }
+    
+    topMatches.forEach((match, index) => {
+        const scorePercentage = Math.max(0, Math.min(100, match.score * 100));
+        const thumbUrl = jacketUrlMap[match.name] || `jackets/${encodeURIComponent(match.name)}`;
+        
+        const matchItem = document.createElement("div");
+        matchItem.className = `match-item ${index === 0 ? "rank-1" : ""}`;
+        
+        const topRow = document.createElement("div");
+        topRow.className = "match-top-row";
+        topRow.innerHTML = `
+            <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
+            <div class="match-info">
+                <div class="match-name" title="${match.name}">${match.name}</div>
+                <div class="score-container">
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
+                    </div>
+                    <div class="score-text">${match.score.toFixed(4)}</div>
+                </div>
+            </div>
+        `;
+        
+        const diagRow = document.createElement("div");
+        diagRow.className = "match-diagnostic-row";
+        
+        const qContainer = document.createElement("div");
+        qContainer.className = "diag-canvas-container";
+        const qCanvas = document.createElement("canvas");
+        qCanvas.width = 80; qCanvas.height = 120;
+        if (match.queryImageData) qCanvas.getContext("2d").putImageData(match.queryImageData, 0, 0);
+        qContainer.appendChild(qCanvas);
+        
+        const rContainer = document.createElement("div");
+        rContainer.className = "diag-canvas-container";
+        const rCanvas = document.createElement("canvas");
+        rCanvas.width = 80; rCanvas.height = 120;
+        const rCtx = rCanvas.getContext("2d", { willReadFrequently: true });
+        
+        const cols = Math.floor(spriteCanvas.width / 80);
+        const sx = (match.index % cols) * 80;
+        const sy = Math.floor(match.index / cols) * 120;
+        rCtx.drawImage(spriteCanvas, sx, sy, 80, 120, 0, 0, 80, 120);
+        
+        const config = maskConfigs[activeMaskName];
+        if (config) {
+            const refData = rCtx.getImageData(0, 0, 80, 120);
+            for (let i = 0; i < 80 * 120; i++) {
+                if (!config.eroded80x120[i]) {
+                    refData.data[i*4] = refData.data[i*4+1] = refData.data[i*4+2] = 0;
+                }
+            }
+            rCtx.putImageData(refData, 0, 0);
+        }
+        rContainer.appendChild(rCanvas);
+        
+        diagRow.appendChild(qContainer);
+        diagRow.appendChild(rContainer);
+        
+        matchItem.appendChild(topRow);
+        matchItem.appendChild(diagRow);
+        
+        matchesList.appendChild(matchItem);
+    });
 }
 
 // 5. Test Image Upload
