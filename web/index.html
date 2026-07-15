@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jacket Searcher (Static WebApp)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1 class="logo-text">JACKET<span>SEARCH</span></h1>
+            <p class="subtitle">BEMANI Dot-Reveal Quiz Solver</p>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Camera & Canvas Section -->
+            <div class="card camera-card">
+                <div class="card-header">
+                    <h2>Live Camera Capture</h2>
+                    <div class="device-selectors">
+                        <select id="camera-select" class="dropdown-select">
+                            <option value="">Detecting cameras...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="video-container">
+                    <video id="webcam-video" autoplay playsinline muted></video>
+                    <!-- Overlay Canvas for Drawing Alignment Dots -->
+                    <canvas id="overlay-canvas"></canvas>
+                    <div id="loading-overlay" class="loading-overlay">
+                        <div class="spinner"></div>
+                        <p id="loading-text">Loading database (0.0 MB)...</p>
+                    </div>
+                </div>
+                <!-- Control Panel -->
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label for="mask-select">Quiz Stage (Mask):</label>
+                        <select id="mask-select" class="dropdown-select">
+                            <option value="5-dot" selected>5-Dot Reveal</option>
+                            <option value="3-dot">3-Dot Reveal</option>
+                            <option value="1-dot">1-Dot (Center) Reveal</option>
+                        </select>
+                    </div>
+                    <div class="control-group buttons-group">
+                        <label>Fallback upload:</label>
+                        <div class="file-upload-wrapper">
+                            <button class="btn btn-secondary">Upload Test Image</button>
+                            <input type="file" id="file-input" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matching Results Section -->
+            <div class="card results-card">
+                <div class="card-header">
+                    <h2>Best Matches</h2>
+                </div>
+                <div class="matches-list" id="matches-list">
+                    <div class="empty-state">
+                        <p>Waiting for query feed...</p>
+                    </div>
+                </div>
+                <div class="debug-panel">
+                    <h3>Visual Match Details</h3>
+                    <div class="debug-canvas-wrapper">
+                        <div>
+                            <span class="label">Aligned Query Grid</span>
+                            <canvas id="debug-query-canvas" width="80" height="120"></canvas>
+                        </div>
+                        <div>
+                            <span class="label">Matched Reference Grid</span>
+                            <canvas id="debug-ref-canvas" width="80" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Core Application Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
