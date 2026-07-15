@@ -26,9 +26,12 @@ const GRID_SLOTS = [
 let jacketNames = [];
 let databaseLoaded = false;
 let databaseNormalizedPixels = null; // Float32Array of pre-normalized pixels
+let spriteImageLoaded = null;       // Image object cache for sprite sheet
 let activeMaskName = "5-dot";
 let videoStream = null;
 let processingInterval = null;
+let isStaticMode = false;
+let lastMatchingResults = [];
 
 // DOM Elements
 const video = document.getElementById("webcam-video");
@@ -40,6 +43,8 @@ const fileInput = document.getElementById("file-input");
 const matchesList = document.getElementById("matches-list");
 const loadingOverlay = document.getElementById("loading-overlay");
 const loadingText = document.getElementById("loading-text");
+const statusBadge = document.getElementById("status-badge");
+const resetCameraBtn = document.getElementById("reset-camera-btn");
 
 const debugQueryCanvas = document.getElementById("debug-query-canvas");
 const dqCtx = debugQueryCanvas.getContext("2d");
@@ -73,6 +78,13 @@ for (let y = 0; y < GRID_H; y++) {
     }
 }
 
+// Update UI status badge helper
+function updateStatus(state, text) {
+    if (!statusBadge) return;
+    statusBadge.textContent = text;
+    statusBadge.className = `badge ${state}`; // e.g. success, warning, info
+}
+
 // 1. Initial Database Loading
 async function initDatabase() {
     try {
@@ -82,7 +94,7 @@ async function initDatabase() {
         loadingText.textContent = "Fetching index mapping...";
         const indexRes = await fetch("jacket_index.json");
         if (!indexRes.ok) throw new Error("Failed to load jacket_index.json");
-        jacketNames = await indexRes.ok ? await indexRes.json() : [];
+        jacketNames = await indexRes.json();
         console.log(`Loaded ${jacketNames.length} song names.`);
         
         loadingText.textContent = "Downloading sprite sheet (~3.5 MB)...";
@@ -93,6 +105,8 @@ async function initDatabase() {
             spriteImg.onload = resolve;
             spriteImg.onerror = reject;
         });
+        
+        spriteImageLoaded = spriteImg; // Cache globally
         
         loadingText.textContent = "Pre-processing database pixels...";
         
@@ -153,6 +167,7 @@ async function initDatabase() {
         
         console.log("Database pre-processing complete!");
         databaseLoaded = true;
+        updateStatus("success", "Database Ready");
         
         // Hide loading overlay
         loadingOverlay.style.opacity = "0";
@@ -161,6 +176,7 @@ async function initDatabase() {
     } catch (err) {
         console.error(err);
         loadingText.textContent = "Initialization failed. Check console errors.";
+        updateStatus("warning", "Load Error");
     }
 }
 
@@ -232,7 +248,7 @@ function drawOverlay() {
     const h = overlayCanvas.height;
     overlayCtx.clearRect(0, 0, w, h);
     
-    // Draw target bounding box (centered, 80% of width)
+    // Draw target bounding box (centered, 85% of width)
     const boxSize = Math.min(w, h) * 0.85;
     const bx = (w - boxSize) / 2;
     const by = (h - boxSize) / 2;
@@ -259,12 +275,11 @@ function drawOverlay() {
     
     // Draw alignment circle overlays
     const dots = getActiveTemplateDots();
-    overlayCtx.fillStyle = "rgba(0, 255, 170, 0.3)";
-    overlayCtx.strokeStyle = "rgba(0, 255, 170, 0.8)";
+    overlayCtx.fillStyle = "rgba(0, 255, 170, 0.2)";
+    overlayCtx.strokeStyle = "rgba(0, 255, 170, 0.7)";
     overlayCtx.lineWidth = 1.5;
     
     for (const dot of dots) {
-        // Map 224x224 template coordinates to screen target box coordinates
         const dx = bx + (dot.cx / 224) * boxSize;
         const dy = by + (dot.cy / 224) * boxSize;
         const r = (19 / 224) * boxSize; // Radius corresponding to diameter ~38 px
@@ -332,7 +347,7 @@ function findQueryCentroids(binaryMask, width, height) {
                     }
                 }
                 
-                if (count > 70) { // Keep components above area threshold
+                if (count > 70) { // Area threshold
                     components.push({
                         cx: sumX / count,
                         cy: sumY / count,
@@ -352,23 +367,24 @@ function findQueryCentroids(binaryMask, width, height) {
 function processQueryFrame() {
     if (!databaseLoaded) return;
     
-    // 1. Capture current frame from webcam and draw/resize to offscreen 224x224 canvas
-    // We crop the centered target box area
-    const vw = video.videoWidth;
-    const vh = video.videoHeight;
-    if (vw === 0 || vh === 0) return;
-    
-    const boxSize = Math.min(vw, vh) * 0.85;
-    const sx = (vw - boxSize) / 2;
-    const sy = (vh - boxSize) / 2;
-    
-    offCtx.drawImage(video, sx, sy, boxSize, boxSize, 0, 0, 224, 224);
+    // 1. Get query frame pixels on offscreen canvas
+    if (!isStaticMode) {
+        const vw = video.videoWidth;
+        const vh = video.videoHeight;
+        if (vw === 0 || vh === 0) return;
+        
+        const boxSize = Math.min(vw, vh) * 0.85;
+        const sx = (vw - boxSize) / 2;
+        const sy = (vh - boxSize) / 2;
+        
+        offCtx.drawImage(video, sx, sy, boxSize, boxSize, 0, 0, 224, 224);
+    }
     
     // 2. Segment the dots dynamically
-    // Sample background color near corners (mean of four 10x10 corners)
     const imgData = offCtx.getImageData(0, 0, 224, 224);
     const pixels = imgData.data;
     
+    // Sample background color near corners (mean of four 10x10 corners)
     let sumR = 0, sumG = 0, sumB = 0, count = 0;
     const sampleCorner = (cx, cy) => {
         for (let dy = 0; dy < 10; dy++) {
@@ -400,29 +416,45 @@ function processQueryFrame() {
         binaryMask[i] = dist > 70 ? 1 : 0;
     }
     
-    // 3. Find Centroids & Align
+    // 3. Find Centroids & Match uniquely using Greedy pairing
     const queryCentroids = findQueryCentroids(binaryMask, 224, 224);
     const activeTemplateDots = getActiveTemplateDots();
     const M = activeTemplateDots.length;
     
     if (queryCentroids.length < M) {
-        displayMessage(`Alignment warning: Align all ${M} dots to targets.`);
+        updateStatus("warning", `Aligning (${queryCentroids.length}/${M} dots)`);
+        // If we haven't displayed anything yet, show waiting state.
+        // Otherwise, keep displaying lastMatches to prevent UI flashing!
+        if (lastMatchingResults.length === 0) {
+            displayMessage(`Waiting for query alignment (${queryCentroids.length}/${M} dots)...`);
+        }
         return;
     }
     
-    // Match query centroids to template centroids using nearest neighbors
-    const matchedQueryDots = [];
-    for (const td of activeTemplateDots) {
+    updateStatus("success", isStaticMode ? "Static Image Mode" : "Live Matching");
+    
+    // Greedy unique nearest assignment
+    const matchedQueryDots = new Array(activeTemplateDots.length).fill(null);
+    const usedQueryIndices = new Set();
+    
+    for (let i = 0; i < activeTemplateDots.length; i++) {
+        const td = activeTemplateDots[i];
         let minDist = Infinity;
-        let closestQ = null;
-        for (const qc of queryCentroids) {
-            const d = Math.sqrt((qc.cx - td.cx)**2 + (qc.cy - td.cy)**2);
-            if (d < minDist) {
-                minDist = d;
-                closestQ = qc;
+        let closestIdx = -1;
+        
+        for (let j = 0; j < queryCentroids.length; j++) {
+            if (usedQueryIndices.has(j)) continue;
+            const qc = queryCentroids[j];
+            const dist = Math.sqrt((qc.cx - td.cx)**2 + (qc.cy - td.cy)**2);
+            if (dist < minDist) {
+                minDist = dist;
+                closestIdx = j;
             }
         }
-        matchedQueryDots.push(closestQ);
+        if (closestIdx !== -1) {
+            matchedQueryDots[i] = queryCentroids[closestIdx];
+            usedQueryIndices.add(closestIdx);
+        }
     }
     
     // Calculate average translation offsets dx, dy
@@ -435,17 +467,15 @@ function processQueryFrame() {
     const dy = sumDy / M;
     
     // 4. Build aligned query grid (120x80)
-    // Draw solid black to debug canvas
     dqCtx.fillStyle = "#000000";
     dqCtx.fillRect(0, 0, GRID_W, GRID_H);
     
     // Draw the active dots into their grid slots
-    // For slots that are not active under the current mask, they will stay solid black (matching the database)
-    for (const td of activeTemplateDots) {
+    for (let i = 0; i < M; i++) {
+        const td = activeTemplateDots[i];
         const slot = GRID_SLOTS[td.slot];
         
-        // Coordinates in query image shifted to align with template
-        // We crop PATCH_SIZE x PATCH_SIZE centered at the template centroid (aligned)
+        // Crop PATCH_SIZE x PATCH_SIZE centered at template centroid (aligned)
         const cropX = td.cx - dx - PATCH_SIZE / 2;
         const cropY = td.cy - dy - PATCH_SIZE / 2;
         
@@ -457,13 +487,11 @@ function processQueryFrame() {
     }
     
     // 5. Apply circular mask dynamically to query grid on canvas (blacking out corners)
-    // In javascript, we can draw circular clipping paths for each slot to erase corner pixels
     dqCtx.save();
     dqCtx.globalCompositeOperation = "destination-in";
     dqCtx.fillStyle = "#000000";
     for (const slot of GRID_SLOTS) {
         dqCtx.beginPath();
-        // Use eroded radius 15.5 for strict matching (erases background color bleed)
         dqCtx.arc(slot.x, slot.y, erodedRadius, 0, 2 * Math.PI);
         dqCtx.fill();
     }
@@ -521,8 +549,11 @@ function processQueryFrame() {
     // Sort and rank matches
     similarityResults.sort((a, b) => b.score - a.score);
     
+    // Cache last results
+    lastMatchingResults = similarityResults.slice(0, 3);
+    
     // 8. Render Results UI
-    renderMatches(similarityResults.slice(0, 3));
+    renderMatches(lastMatchingResults);
 }
 
 function displayMessage(msg) {
@@ -534,57 +565,62 @@ function renderMatches(topMatches) {
     
     topMatches.forEach((match, index) => {
         const rankClass = index === 0 ? "rank-1" : "";
-        const scorePercentage = Math.max(0, Math.min(100, match.score * 100));
+        // Map score 0.0-1.0 to a nice progress bar percentage (using wider visual range)
+        const scorePercentage = Math.max(0, Math.min(100, (match.score - 0.2) / 0.8 * 100));
         
         const matchItem = document.createElement("div");
         matchItem.className = `match-item ${rankClass}`;
         
-        // Draw matched reference grid to offscreen to fetch as image
-        // Or dynamically draw it to the debug reference canvas
         if (index === 0) {
             drawRefGridToCanvas(match.index);
         }
         
-        // We link directly to RemyWiki's folder structure or local folder
-        // For github pages, we can just load the local cropped jacket thumbnail from jackets directory
-        const thumbUrl = `../jackets/${encodeURIComponent(match.name)}`;
-        
+        // Create canvas element for thumbnail (avoid loading individual jacket images from server)
         matchItem.innerHTML = `
             <div class="match-rank">${index + 1}</div>
-            <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
+            <canvas class="match-thumbnail-canvas" width="80" height="120" style="width: 48px; height: 72px; border-radius: 6px; border: 1px solid var(--border-color); object-fit: cover; background: #000; flex-shrink: 0;"></canvas>
             <div class="match-info">
                 <div class="match-name" title="${match.name}">${match.name}</div>
                 <div class="score-container">
                     <div class="score-bar-wrapper">
                         <div class="score-bar" style="width: ${scorePercentage}%"></div>
                     </div>
-                    <div class="score-text">${match.score.toFixed(4)}</div>
+                    <div class="score-text">${match.score.toFixed(5)}</div>
                 </div>
             </div>
         `;
         
         matchesList.appendChild(matchItem);
+        
+        // Draw matched grid slice directly from cache to results canvas
+        const canvasEl = matchItem.querySelector(".match-thumbnail-canvas");
+        const ctxEl = canvasEl.getContext("2d");
+        
+        const col = match.index % SPRITE_COLS;
+        const row = Math.floor(match.index / SPRITE_COLS);
+        const sx = col * GRID_W;
+        const sy = row * GRID_H;
+        
+        if (spriteImageLoaded) {
+            ctxEl.drawImage(spriteImageLoaded, sx, sy, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
+        }
     });
 }
 
 function drawRefGridToCanvas(jacketIdx) {
-    // Draws the matched reference grid from jackets_sprite.webp to the debug reference canvas
+    // Draws the matched reference grid from sprite sheet image cache to debug canvas
     const col = jacketIdx % SPRITE_COLS;
     const row = Math.floor(jacketIdx / SPRITE_COLS);
     const sx = col * GRID_W;
     const sy = row * GRID_H;
     
-    // Load the sprite image element and draw to canvas
-    const spriteImg = new Image();
-    spriteImg.src = "jackets_sprite.webp";
-    
-    spriteImg.onload = () => {
-        drCtx.clearRect(0, 0, GRID_W, GRID_H);
-        drCtx.drawImage(spriteImg, sx, sy, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
-    };
+    drCtx.clearRect(0, 0, GRID_W, GRID_H);
+    if (spriteImageLoaded) {
+        drCtx.drawImage(spriteImageLoaded, sx, sy, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
+    }
 }
 
-// 6. Test Image Upload Handler (Local Debugging Fallback)
+// 6. Test Image Upload Handler (Local & Production Debugging Fallback)
 function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -593,26 +629,40 @@ function handleFileUpload(e) {
     reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-            // Draw static image to offscreen canvas and trigger matching
+            isStaticMode = true;
+            resetCameraBtn.style.display = "inline-block";
+            
+            // Draw static image to offscreen 224x224 canvas
             offCtx.clearRect(0, 0, 224, 224);
             offCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, 224, 224);
             
-            // Trigger processQueryFrame using offscreenCanvas instead of webcam
-            // We temporarily override the video drawer
-            const originalProcess = processQueryFrame;
-            // Execute matching on the uploaded image directly
+            // Force immediate processing
             processQueryFrame();
         };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
+    // Reset file input value so uploading the same file triggers change event
+    fileInput.value = "";
 }
 
-// 7. Event Listeners & Initialize
+// 7. Reset to Live Camera Mode
+resetCameraBtn.addEventListener("click", () => {
+    isStaticMode = false;
+    resetCameraBtn.style.display = "none";
+    lastMatchingResults = [];
+    dqCtx.clearRect(0, 0, GRID_W, GRID_H);
+    drCtx.clearRect(0, 0, GRID_W, GRID_H);
+    displayMessage("Waiting for query feed...");
+    updateStatus("success", "Live Matching");
+});
+
+// 8. Event Listeners & Initialize
 maskSelect.addEventListener("change", (e) => {
     activeMaskName = e.target.value;
     drawOverlay();
     // Clear results UI when mask changes
+    lastMatchingResults = [];
     displayMessage("Waiting for query feed...");
 });
 

@@ -24,7 +24,7 @@
             <!-- Camera & Canvas Section -->
             <div class="card camera-card">
                 <div class="card-header">
-                    <h2>Live Camera Capture</h2>
+                    <h2>Live Camera Capture <span id="status-badge" class="badge info">Detecting</span></h2>
                     <div class="device-selectors">
                         <select id="camera-select" class="dropdown-select">
                             <option value="">Detecting cameras...</option>
@@ -56,6 +56,7 @@
                             <button class="btn btn-secondary">Upload Test Image</button>
                             <input type="file" id="file-input" accept="image/*">
                         </div>
+                        <button id="reset-camera-btn" class="btn btn-primary" style="display:none; margin-top: 5px;">Resume Live Camera</button>
                     </div>
                 </div>
             </div>

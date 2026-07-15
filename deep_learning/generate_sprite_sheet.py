@@ -59,7 +59,7 @@ def main():
     sys.stderr.reconfigure(encoding='utf-8')
     
     jackets_dir = "jackets"
-    web_dir = "web"
+    web_dir = "."
     os.makedirs(web_dir, exist_ok=True)
     
     image_files = [f for f in os.listdir(jackets_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))]
@@ -108,11 +108,10 @@ def main():
         except Exception as e:
             print(f"Error processing {filename}: {e}")
             
-    # Save the sprite sheet as WebP with lossless compression or high quality
+    # Save the sprite sheet as WebP with high quality lossy compression (quality = 90)
     sprite_path = os.path.join(web_dir, "jackets_sprite.webp")
     print(f"Saving sprite sheet to {sprite_path}...")
-    # cv2.IMWRITE_WEBP_QUALITY = 101 represents lossless compression in OpenCV
-    cv2.imwrite(sprite_path, sprite_image, [cv2.IMWRITE_WEBP_QUALITY, 101])
+    cv2.imwrite(sprite_path, sprite_image, [cv2.IMWRITE_WEBP_QUALITY, 90])
     
     # Save the filename index mapping list
     index_path = os.path.join(web_dir, "jacket_index.json")
