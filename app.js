@@ -44,7 +44,6 @@ const fileInput = document.getElementById("file-input");
 const matchesList = document.getElementById("matches-list");
 const loadingOverlay = document.getElementById("loading-overlay");
 const loadingText = document.getElementById("loading-text");
-const matchCountBadge = document.getElementById("match-count-badge");
 const statusOverlay = document.getElementById("status-overlay");
 const clearMatchesBtn = document.getElementById("clear-matches-btn");
 const freezeBtn = document.getElementById("freeze-btn");
@@ -213,7 +212,6 @@ async function initDatabase() {
         const indexRes = await fetch("jacket_index.json");
         if (!indexRes.ok) throw new Error("Failed to load jacket_index.json");
         jacketNames = await indexRes.json();
-        matchCountBadge.textContent = `${jacketNames.length}`;
         
         loadingText.textContent = "Fetching URLs mapping...";
         const urlRes = await fetch("jacket_urls.txt");
@@ -642,24 +640,29 @@ function renderMatches(topMatches) {
         
         const matchItem = document.createElement("div");
         matchItem.className = `match-item ${index === 0 ? "rank-1" : ""}`;
+        matchItem.style.flexDirection = "column";
         
-        const topRow = document.createElement("div");
-        topRow.className = "match-top-row";
-        topRow.innerHTML = `
-            <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
-            <div class="match-info">
-                <div class="match-name" title="${match.name}">${match.name}</div>
-                <div class="score-container">
+        matchItem.innerHTML = `
+            <div class="match-header" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 1rem;">
+                <div class="match-name" title="${match.name}" style="flex: 1;">${match.name}</div>
+                <div class="score-container" style="min-width: 100px; flex-shrink: 0; text-align: right;">
+                    <div class="score-text" style="font-weight: bold; margin-bottom: 4px;">${match.score.toFixed(4)}</div>
                     <div class="score-bar-bg">
                         <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
                     </div>
-                    <div class="score-text">${match.score.toFixed(4)}</div>
                 </div>
+            </div>
+            <div class="match-content" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 0.5rem; gap: 1rem;">
+                <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
             </div>
         `;
         
+        const matchContent = matchItem.querySelector('.match-content');
+        
         const diagRow = document.createElement("div");
         diagRow.className = "match-diagnostic-row";
+        diagRow.style.flex = "1";
+        diagRow.style.justifyContent = "flex-end";
         
         const qContainer = document.createElement("div");
         qContainer.className = "diag-canvas-container";
@@ -694,8 +697,7 @@ function renderMatches(topMatches) {
         diagRow.appendChild(qContainer);
         diagRow.appendChild(rContainer);
         
-        matchItem.appendChild(topRow);
-        matchItem.appendChild(diagRow);
+        matchContent.appendChild(diagRow);
         
         matchesList.appendChild(matchItem);
     });
@@ -722,11 +724,22 @@ function handleFileUpload(e) {
     reader.readAsDataURL(file);
 }
 
-// Event Listeners & Initialize
-maskSelect.addEventListener("change", (e) => {
-    activeMaskName = e.target.value;
-    isLiveFeed = true; // Resume webcam
-    drawOverlay();
+const maskButtons = document.querySelectorAll("#mask-buttons button");
+
+maskButtons.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        maskButtons.forEach(b => {
+            b.classList.remove("primary-btn");
+            b.classList.add("outline-btn");
+        });
+        e.target.classList.remove("outline-btn");
+        e.target.classList.add("primary-btn");
+        activeMaskName = e.target.getAttribute("data-mask");
+        drawOverlay();
+    });
+});
+
+cameraSelect.addEventListener("change", (e) => { drawOverlay();
     showStatus("Waiting for query feed...");
 });
 

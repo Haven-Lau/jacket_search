@@ -17,18 +17,18 @@
                 <div class="panel-header">
                     <div class="header-left">
                         <h2>Live Vision Feed</h2>
-                        <div class="upload-btn-wrapper" style="margin-left: 1rem; display: flex; gap: 0.5rem;">
-                            <button id="freeze-btn" class="btn outline-btn btn-sm">Freeze</button>
+                        <div class="upload-btn-wrapper" style="margin-left: 1rem;">
                             <button class="btn primary-btn btn-sm">Upload Image</button>
                             <input type="file" id="file-input" accept="image/*">
                         </div>
                     </div>
                     <div class="controls">
-                        <select id="mask-select" class="control-select">
-                            <option value="5-dot">5-Dot Reveal</option>
-                            <option value="3-dot">3-Dot Reveal</option>
-                            <option value="1-dot">1-Dot Reveal</option>
-                        </select>
+                        <div class="mask-buttons" id="mask-buttons" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Dots:</span>
+                            <button class="btn outline-btn btn-sm" data-mask="1-dot">1</button>
+                            <button class="btn outline-btn btn-sm" data-mask="3-dot">3</button>
+                            <button class="btn primary-btn btn-sm" data-mask="5-dot">5</button>
+                        </div>
                         <select id="camera-select" class="control-select">
                             <option value="">Loading cameras...</option>
                         </select>
@@ -49,8 +49,8 @@
                 <div class="panel-header">
                     <h2>Best Matches</h2>
                     <div class="controls">
+                        <button id="freeze-btn" class="btn outline-btn btn-sm">Freeze</button>
                         <button id="clear-matches-btn" class="btn outline-btn btn-sm">Clear</button>
-                        <span class="badge" id="match-count-badge">0 DB</span>
                     </div>
                 </div>
                 
