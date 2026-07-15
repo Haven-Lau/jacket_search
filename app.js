@@ -13,8 +13,17 @@ const GRID_SLOTS = [
     { x: 20, y: 100 }  // 4: Bottom-Right
 ];
 
+const BASE_CENTROIDS = [
+    { cx: 51, cy: 53 },   // TL
+    { cx: 169, cy: 53 },  // TR
+    { cx: 110, cy: 111 }, // C
+    { cx: 51, cy: 171 },  // BL
+    { cx: 168, cy: 171 }  // BR
+];
+
 // Global State
 let jacketNames = [];
+let jacketUrlMap = {};
 let databaseLoaded = false;
 let spriteCanvas = null; // Holds the 2560x8280 sprite
 let maskConfigs = {}; // Stores configuration and pre-normalized DB per mask
@@ -35,10 +44,16 @@ const loadingText = document.getElementById("loading-text");
 const matchCountBadge = document.getElementById("match-count-badge");
 const statusOverlay = document.getElementById("status-overlay");
 
-const debugQueryCanvas = document.getElementById("debug-query-canvas");
-const dqCtx = debugQueryCanvas.getContext("2d");
-const debugRefCanvas = document.getElementById("debug-ref-canvas");
-const drCtx = debugRefCanvas.getContext("2d");
+// Diagnostic Canvases (Created in JS now)
+const debugQueryCanvas = document.createElement("canvas");
+debugQueryCanvas.width = GRID_W;
+debugQueryCanvas.height = GRID_H;
+const dqCtx = debugQueryCanvas.getContext("2d", { willReadFrequently: true });
+
+const debugRefCanvas = document.createElement("canvas");
+debugRefCanvas.width = GRID_W;
+debugRefCanvas.height = GRID_H;
+const drCtx = debugRefCanvas.getContext("2d", { willReadFrequently: true });
 
 // Offscreen canvas for fast video frame extraction
 const offscreenCanvas = document.createElement("canvas");
@@ -59,46 +74,48 @@ function invert3x3(m) {
     ];
 }
 
-// Estimates a full 6-DoF Affine transform mapping srcPts -> dstPts using linear least squares
+// Estimates a Similarity Transform (4-DoF: Scale, Rotation, Translation) mapping srcPts -> dstPts using linear least squares
 function estimateAffine(srcPts, dstPts) {
     const N = srcPts.length;
     if (N === 0) return null;
-    if (N < 3) {
-        // Translation only fallback
+    if (N < 2) {
+        // Translation only fallback for 1-dot
         const tx = dstPts[0].x - srcPts[0].x;
         const ty = dstPts[0].y - srcPts[0].y;
         return { a: 1, b: 0, tx, c: 0, d: 1, ty };
     }
     
-    let sumXX = 0, sumXY = 0, sumX = 0, sumYY = 0, sumY = 0;
+    let sumX = 0, sumY = 0, sumU = 0, sumV = 0;
     for (let i = 0; i < N; i++) {
-        const x = srcPts[i].x, y = srcPts[i].y;
-        sumXX += x*x; sumXY += x*y; sumX += x; sumYY += y*y; sumY += y;
-    }
-    const PTP = [
-        [sumXX, sumXY, sumX],
-        [sumXY, sumYY, sumY],
-        [sumX,  sumY,  N   ]
-    ];
-    const PTP_inv = invert3x3(PTP);
-    if (!PTP_inv) return null;
-    
-    let PTQx = [0, 0, 0], PTQy = [0, 0, 0];
-    for (let i = 0; i < N; i++) {
-        const x = srcPts[i].x, y = srcPts[i].y, qx = dstPts[i].x, qy = dstPts[i].y;
-        PTQx[0] += x*qx; PTQx[1] += y*qx; PTQx[2] += qx;
-        PTQy[0] += x*qy; PTQy[1] += y*qy; PTQy[2] += qy;
+        sumX += srcPts[i].x; sumY += srcPts[i].y;
+        sumU += dstPts[i].x; sumV += dstPts[i].y;
     }
     
-    const a = PTP_inv[0][0]*PTQx[0] + PTP_inv[0][1]*PTQx[1] + PTP_inv[0][2]*PTQx[2];
-    const b = PTP_inv[1][0]*PTQx[0] + PTP_inv[1][1]*PTQx[1] + PTP_inv[1][2]*PTQx[2];
-    const tx = PTP_inv[2][0]*PTQx[0] + PTP_inv[2][1]*PTQx[1] + PTP_inv[2][2]*PTQx[2];
+    const meanX = sumX / N, meanY = sumY / N;
+    const meanU = sumU / N, meanV = sumV / N;
     
-    const c = PTP_inv[0][0]*PTQy[0] + PTP_inv[0][1]*PTQy[1] + PTP_inv[0][2]*PTQy[2];
-    const d = PTP_inv[1][0]*PTQy[0] + PTP_inv[1][1]*PTQy[1] + PTP_inv[1][2]*PTQy[2];
-    const ty = PTP_inv[2][0]*PTQy[0] + PTP_inv[2][1]*PTQy[1] + PTP_inv[2][2]*PTQy[2];
+    let den = 0, numA = 0, numB = 0;
+    for (let i = 0; i < N; i++) {
+        const dx = srcPts[i].x - meanX, dy = srcPts[i].y - meanY;
+        const du = dstPts[i].x - meanU, dv = dstPts[i].y - meanV;
+        
+        den += dx*dx + dy*dy;
+        numA += du*dx + dv*dy;
+        numB += dv*dx - du*dy;
+    }
     
-    return { a, b, tx, c, d, ty };
+    if (den < 1e-6) {
+        // Fallback to translation if points are degenerate
+        return { a: 1, b: 0, tx: meanU - meanX, c: 0, d: 1, ty: meanV - meanY };
+    }
+    
+    const a = numA / den;
+    const b = numB / den;
+    
+    const tx = meanU - a * meanX + b * meanY;
+    const ty = meanV - b * meanX - a * meanY;
+    
+    return { a: a, b: -b, tx: tx, c: b, d: a, ty: ty };
 }
 
 // Warp using nearest neighbor
@@ -190,6 +207,20 @@ async function initDatabase() {
         jacketNames = await indexRes.json();
         matchCountBadge.textContent = `${jacketNames.length} DB`;
         
+        loadingText.textContent = "Fetching URLs mapping...";
+        const urlRes = await fetch("jacket_urls.txt");
+        if (urlRes.ok) {
+            const urlsText = await urlRes.text();
+            const urls = urlsText.split('\n').filter(l => l.trim().length > 0);
+            for (const url of urls) {
+                const rawFilename = url.split('/').pop();
+                let decoded = decodeURIComponent(rawFilename);
+                const invalidChars = '<>:"/\\|?*';
+                for (const char of invalidChars) decoded = decoded.split(char).join('_');
+                jacketUrlMap[decoded] = url.trim();
+            }
+        }
+        
         loadingText.textContent = "Downloading sprite sheet (~3.5 MB)...";
         const spriteImg = new Image();
         spriteImg.src = "jackets_sprite.webp";
@@ -244,9 +275,19 @@ async function prepareMaskConfigs(sCtx) {
         const eroded80x120 = new Uint8Array(GRID_W * GRID_H);
         let pixelCount = 0;
         
+        // Map each template dot to the correct base centroid index to pick the correct slot
+        const tdSlotIndices = templateDots.map(td => {
+            let minD = Infinity, minIdx = 0;
+            for (let k = 0; k < BASE_CENTROIDS.length; k++) {
+                const d = Math.hypot(td.cx - BASE_CENTROIDS[k].cx, td.cy - BASE_CENTROIDS[k].cy);
+                if (d < minD) { minD = d; minIdx = k; }
+            }
+            return minIdx;
+        });
+        
         for (let i = 0; i < templateDots.length; i++) {
             const td = templateDots[i];
-            const slot = GRID_SLOTS[i];
+            const slot = GRID_SLOTS[tdSlotIndices[i]];
             for (let dy = -20; dy < 20; dy++) {
                 for (let dx = -20; dx < 20; dx++) {
                     const mx = Math.round(td.cx) + dx;
@@ -301,7 +342,19 @@ async function prepareMaskConfigs(sCtx) {
             }
         }
         
-        maskConfigs[name] = { templateDots, eroded80x120, pixelCount, dbNorms };
+        // Generate overlay bitmap from eroded224 for intuitive camera alignment
+        const erodedImgData = new ImageData(224, 224);
+        for (let i = 0; i < 224 * 224; i++) {
+            if (eroded224[i]) {
+                erodedImgData.data[i*4] = 16;     // R
+                erodedImgData.data[i*4+1] = 185;  // G
+                erodedImgData.data[i*4+2] = 129;  // B
+                erodedImgData.data[i*4+3] = 150;  // A
+            }
+        }
+        const erodedBitmap = await createImageBitmap(erodedImgData);
+        
+        maskConfigs[name] = { templateDots, eroded80x120, pixelCount, dbNorms, erodedBitmap };
     }
 }
 
@@ -366,27 +419,20 @@ function drawOverlay() {
     overlayCtx.lineWidth = 2;
     overlayCtx.strokeRect(bx, by, boxSize, boxSize);
     
-    // Draw alignment circle overlays based on active mask
     if (!maskConfigs[activeMaskName]) return;
-    const dots = maskConfigs[activeMaskName].templateDots;
+    const config = maskConfigs[activeMaskName];
     
-    overlayCtx.fillStyle = "rgba(16, 185, 129, 0.3)";
-    overlayCtx.strokeStyle = "rgba(16, 185, 129, 0.8)";
-    overlayCtx.lineWidth = 1.5;
-    
-    for (const dot of dots) {
-        const dx = bx + (dot.cx / 224) * boxSize;
-        const dy = by + (dot.cy / 224) * boxSize;
-        const r = (19 / 224) * boxSize;
-        overlayCtx.beginPath();
-        overlayCtx.arc(dx, dy, r, 0, 2 * Math.PI);
-        overlayCtx.fill(); overlayCtx.stroke();
+    // Draw the actual eroded mask preview instead of circles
+    if (config.erodedBitmap) {
+        overlayCtx.drawImage(config.erodedBitmap, bx, by, boxSize, boxSize);
     }
 }
 
 // 4. Query Processing & NCC Match
+let isLiveFeed = true;
+
 function processQueryFrame() {
-    if (!databaseLoaded) return;
+    if (!databaseLoaded || !isLiveFeed) return;
     
     const vw = video.videoWidth, vh = video.videoHeight;
     if (vw === 0 || vh === 0) return;
@@ -441,10 +487,11 @@ function runMatchingPipeline() {
     }
     statusOverlay.classList.add("hidden");
     
-    // Take largest N dots and match to template using NN
+    // 3. Find top N largest blobs, up to 5
     queryDots.sort((a, b) => b.area - a.area);
-    const topQueryDots = queryDots.slice(0, templateDots.length);
+    const topQueryDots = queryDots.slice(0, Math.max(templateDots.length, 5));
     
+    // Map each template dot to the spatially closest query dot
     const srcPts = [], dstPts = []; // We map Template (src) -> Query (dst)
     for (const td of templateDots) {
         let minDist = Infinity, closestQ = null;
@@ -452,8 +499,10 @@ function runMatchingPipeline() {
             const d = Math.hypot(qd.cx - td.cx, qd.cy - td.cy);
             if (d < minDist) { minDist = d; closestQ = qd; }
         }
-        srcPts.push({x: td.cx, y: td.cy});
-        dstPts.push({x: closestQ.cx, y: closestQ.cy});
+        if (closestQ) {
+            srcPts.push({x: td.cx, y: td.cy});
+            dstPts.push({x: closestQ.cx, y: closestQ.cy});
+        }
     }
     
     // 4. Affine Alignment (Warp to perfectly align with templates)
@@ -469,8 +518,18 @@ function runMatchingPipeline() {
     // Temporarily write warped data back to offscreen to drawImage crop
     offCtx.putImageData(warpedData, 0, 0);
     
+    // Map each template dot to the correct base centroid index
+    const tdSlotIndices = templateDots.map(td => {
+        let minD = Infinity, minIdx = 0;
+        for (let k = 0; k < BASE_CENTROIDS.length; k++) {
+            const d = Math.hypot(td.cx - BASE_CENTROIDS[k].cx, td.cy - BASE_CENTROIDS[k].cy);
+            if (d < minD) { minD = d; minIdx = k; }
+        }
+        return minIdx;
+    });
+    
     for (let i = 0; i < templateDots.length; i++) {
-        const td = templateDots[i], slot = GRID_SLOTS[i];
+        const td = templateDots[i], slot = GRID_SLOTS[tdSlotIndices[i]];
         const cx = Math.round(td.cx), cy = Math.round(td.cy);
         dqCtx.drawImage(
             offscreenCanvas,
@@ -532,38 +591,58 @@ function runMatchingPipeline() {
     }
     
     similarityResults.sort((a, b) => b.score - a.score);
-    renderMatches(similarityResults.slice(0, 5));
+    renderMatches(similarityResults.slice(0, 1));
 }
 
 function renderMatches(topMatches) {
     matchesList.innerHTML = "";
     
-    topMatches.forEach((match, index) => {
-        const rankClass = index === 0 ? "rank-1" : "";
-        const scorePercentage = Math.max(0, Math.min(100, match.score * 100));
-        
-        const matchItem = document.createElement("div");
-        matchItem.className = `match-item ${rankClass}`;
-        
-        if (index === 0) drawRefGridToCanvas(match.index);
-        
-        const thumbUrl = `jackets/${encodeURIComponent(match.name)}`;
-        
-        matchItem.innerHTML = `
-            <div class="match-rank">${index + 1}</div>
-            <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
-            <div class="match-info">
-                <div class="match-name" title="${match.name}">${match.name}</div>
-                <div class="score-container">
-                    <div class="score-bar-bg">
-                        <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
-                    </div>
-                    <div class="score-text">${match.score.toFixed(4)}</div>
+    if (topMatches.length === 0) return;
+    const match = topMatches[0];
+    const scorePercentage = Math.max(0, Math.min(100, match.score * 100));
+    
+    drawRefGridToCanvas(match.index);
+    
+    const thumbUrl = jacketUrlMap[match.name] || `jackets/${encodeURIComponent(match.name)}`;
+    
+    const matchItem = document.createElement("div");
+    matchItem.className = `match-item rank-1`;
+    
+    const topRow = document.createElement("div");
+    topRow.className = "match-top-row";
+    topRow.innerHTML = `
+        <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
+        <div class="match-info">
+            <div class="match-name" title="${match.name}">${match.name}</div>
+            <div class="score-container">
+                <div class="score-bar-bg">
+                    <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
                 </div>
+                <div class="score-text">${match.score.toFixed(4)}</div>
             </div>
-        `;
-        matchesList.appendChild(matchItem);
-    });
+        </div>
+    `;
+    
+    const diagRow = document.createElement("div");
+    diagRow.className = "match-diagnostic-row";
+    
+    const qContainer = document.createElement("div");
+    qContainer.className = "diag-canvas-container";
+    qContainer.innerHTML = '<span class="diag-canvas-label">Query</span>';
+    qContainer.appendChild(debugQueryCanvas);
+    
+    const rContainer = document.createElement("div");
+    rContainer.className = "diag-canvas-container";
+    rContainer.innerHTML = '<span class="diag-canvas-label">Match</span>';
+    rContainer.appendChild(debugRefCanvas);
+    
+    diagRow.appendChild(qContainer);
+    diagRow.appendChild(rContainer);
+    
+    matchItem.appendChild(topRow);
+    matchItem.appendChild(diagRow);
+    
+    matchesList.appendChild(matchItem);
 }
 
 function drawRefGridToCanvas(jacketIdx) {
@@ -592,6 +671,9 @@ function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
     
+    isLiveFeed = false; // Pause webcam
+    showStatus("Processing uploaded image...");
+    
     const reader = new FileReader();
     reader.onload = (event) => {
         const img = new Image();
@@ -608,6 +690,7 @@ function handleFileUpload(e) {
 // Event Listeners & Initialize
 maskSelect.addEventListener("change", (e) => {
     activeMaskName = e.target.value;
+    isLiveFeed = true; // Resume webcam
     drawOverlay();
     showStatus("Waiting for query feed...");
 });
@@ -618,6 +701,11 @@ window.addEventListener("resize", resizeCanvas);
 async function init() {
     await initDatabase();
     await setupCameras();
+    
+    cameraSelect.addEventListener("change", () => {
+        isLiveFeed = true; // Resume webcam
+    });
+    
     // Run at 8 FPS
     processingInterval = setInterval(processQueryFrame, 125);
 }
