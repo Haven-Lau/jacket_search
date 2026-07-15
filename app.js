@@ -652,29 +652,36 @@ function renderMatches(topMatches) {
                     </div>
                 </div>
             </div>
-            <div class="match-content" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 0.5rem; gap: 1rem;">
-                <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
+            <div class="match-content" style="display: flex; justify-content: flex-end; width: 100%; margin-top: 0.5rem; gap: 0; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 4px; overflow: hidden;">
             </div>
         `;
         
         const matchContent = matchItem.querySelector('.match-content');
         
-        const diagRow = document.createElement("div");
-        diagRow.className = "match-diagnostic-row";
-        diagRow.style.flex = "1";
-        diagRow.style.justifyContent = "flex-end";
+        const thumbImg = document.createElement("img");
+        thumbImg.src = thumbUrl;
+        thumbImg.alt = "Jacket";
+        thumbImg.style.width = "60px";
+        thumbImg.style.height = "90px";
+        thumbImg.style.objectFit = "cover";
+        thumbImg.style.display = "block";
+        matchContent.appendChild(thumbImg);
         
-        const qContainer = document.createElement("div");
-        qContainer.className = "diag-canvas-container";
         const qCanvas = document.createElement("canvas");
         qCanvas.width = 80; qCanvas.height = 120;
+        qCanvas.style.width = "60px"; qCanvas.style.height = "90px";
+        qCanvas.style.backgroundColor = "#000";
+        qCanvas.style.imageRendering = "pixelated";
+        qCanvas.style.display = "block";
         if (match.queryImageData) qCanvas.getContext("2d").putImageData(match.queryImageData, 0, 0);
-        qContainer.appendChild(qCanvas);
+        matchContent.appendChild(qCanvas);
         
-        const rContainer = document.createElement("div");
-        rContainer.className = "diag-canvas-container";
         const rCanvas = document.createElement("canvas");
         rCanvas.width = 80; rCanvas.height = 120;
+        rCanvas.style.width = "60px"; rCanvas.style.height = "90px";
+        rCanvas.style.backgroundColor = "#000";
+        rCanvas.style.imageRendering = "pixelated";
+        rCanvas.style.display = "block";
         const rCtx = rCanvas.getContext("2d", { willReadFrequently: true });
         
         const cols = Math.floor(spriteCanvas.width / 80);
@@ -692,12 +699,7 @@ function renderMatches(topMatches) {
             }
             rCtx.putImageData(refData, 0, 0);
         }
-        rContainer.appendChild(rCanvas);
-        
-        diagRow.appendChild(qContainer);
-        diagRow.appendChild(rContainer);
-        
-        matchContent.appendChild(diagRow);
+        matchContent.appendChild(rCanvas);
         
         matchesList.appendChild(matchItem);
     });
