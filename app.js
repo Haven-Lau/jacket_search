@@ -4,34 +4,23 @@ const GRID_W = 80;
 const GRID_H = 120;
 const PATCH_SIZE = 40;
 
-// Ideal Template Centroids (224x224 coordinates)
-const TEMPLATE_DOTS_ALL = [
-    { cx: 51.17, cy: 52.83, slot: 0 },   // 0: Top-Left
-    { cx: 168.84, cy: 52.84, slot: 1 },  // 1: Top-Right
-    { cx: 110.03, cy: 111.18, slot: 2 }, // 2: Center
-    { cx: 51.18, cy: 170.69, slot: 3 },  // 3: Bottom-Left
-    { cx: 168.34, cy: 170.66, slot: 4 }  // 4: Bottom-Right
-];
-
-// Grid slots in the 120x80 compiled patch grid
+// The fixed slots in the 80x120 patch grid
 const GRID_SLOTS = [
-    { x: 20, y: 20 },  // Slot 0 (Top-Left)
-    { x: 60, y: 20 },  // Slot 1 (Top-Right)
-    { x: 20, y: 60 },  // Slot 2 (Center)
-    { x: 60, y: 60 },  // Slot 3 (Bottom-Left)
-    { x: 20, y: 100 }  // Slot 4 (Bottom-Right)
+    { x: 20, y: 20 },  // 0: Top-Left
+    { x: 60, y: 20 },  // 1: Top-Right
+    { x: 20, y: 60 },  // 2: Center
+    { x: 60, y: 60 },  // 3: Bottom-Left
+    { x: 20, y: 100 }  // 4: Bottom-Right
 ];
 
 // Global State
 let jacketNames = [];
 let databaseLoaded = false;
-let databaseNormalizedPixels = null; // Float32Array of pre-normalized pixels
-let spriteImageLoaded = null;       // Image object cache for sprite sheet
+let spriteCanvas = null; // Holds the 2560x8280 sprite
+let maskConfigs = {}; // Stores configuration and pre-normalized DB per mask
 let activeMaskName = "5-dot";
 let videoStream = null;
 let processingInterval = null;
-let isStaticMode = false;
-let lastMatchingResults = [];
 
 // DOM Elements
 const video = document.getElementById("webcam-video");
@@ -43,148 +32,284 @@ const fileInput = document.getElementById("file-input");
 const matchesList = document.getElementById("matches-list");
 const loadingOverlay = document.getElementById("loading-overlay");
 const loadingText = document.getElementById("loading-text");
-const statusBadge = document.getElementById("status-badge");
-const resetCameraBtn = document.getElementById("reset-camera-btn");
+const matchCountBadge = document.getElementById("match-count-badge");
+const statusOverlay = document.getElementById("status-overlay");
 
 const debugQueryCanvas = document.getElementById("debug-query-canvas");
 const dqCtx = debugQueryCanvas.getContext("2d");
 const debugRefCanvas = document.getElementById("debug-ref-canvas");
 const drCtx = debugRefCanvas.getContext("2d");
 
-// Create offscreen canvas for resizing
+// Offscreen canvas for fast video frame extraction
 const offscreenCanvas = document.createElement("canvas");
 offscreenCanvas.width = 224;
 offscreenCanvas.height = 224;
-const offCtx = offscreenCanvas.getContext("2d");
+const offCtx = offscreenCanvas.getContext("2d", { willReadFrequently: true });
 
-// Precompute the circular eroded mask
-const erodedMask = new Uint8Array(GRID_W * GRID_H);
-const erodedRadius = 15.5; // matching Python's eroded mask (iterations=2)
-let maskPixelCount = 0;
-
-for (let y = 0; y < GRID_H; y++) {
-    for (let x = 0; x < GRID_W; x++) {
-        let inside = false;
-        // Check distance to closest slot center
-        for (const slot of GRID_SLOTS) {
-            const dist = Math.sqrt((x - slot.x)**2 + (y - slot.y)**2);
-            if (dist <= erodedRadius) {
-                inside = true;
-                break;
-            }
-        }
-        erodedMask[y * GRID_W + x] = inside ? 1 : 0;
-        if (inside) maskPixelCount++;
-    }
+// Math Utilities
+function invert3x3(m) {
+    const det = m[0][0]*(m[1][1]*m[2][2] - m[1][2]*m[2][1])
+              - m[0][1]*(m[1][0]*m[2][2] - m[1][2]*m[2][0])
+              + m[0][2]*(m[1][0]*m[2][1] - m[1][1]*m[2][0]);
+    if (Math.abs(det) < 1e-8) return null;
+    return [
+        [(m[1][1]*m[2][2] - m[1][2]*m[2][1])/det, (m[0][2]*m[2][1] - m[0][1]*m[2][2])/det, (m[0][1]*m[1][2] - m[0][2]*m[1][1])/det],
+        [(m[1][2]*m[2][0] - m[1][0]*m[2][2])/det, (m[0][0]*m[2][2] - m[0][2]*m[2][0])/det, (m[0][2]*m[1][0] - m[0][0]*m[1][2])/det],
+        [(m[1][0]*m[2][1] - m[1][1]*m[2][0])/det, (m[0][1]*m[2][0] - m[0][0]*m[2][1])/det, (m[0][0]*m[1][1] - m[0][1]*m[1][0])/det]
+    ];
 }
 
-// Update UI status badge helper
-function updateStatus(state, text) {
-    if (!statusBadge) return;
-    statusBadge.textContent = text;
-    statusBadge.className = `badge ${state}`; // e.g. success, warning, info
+// Estimates a full 6-DoF Affine transform mapping srcPts -> dstPts using linear least squares
+function estimateAffine(srcPts, dstPts) {
+    const N = srcPts.length;
+    if (N === 0) return null;
+    if (N < 3) {
+        // Translation only fallback
+        const tx = dstPts[0].x - srcPts[0].x;
+        const ty = dstPts[0].y - srcPts[0].y;
+        return { a: 1, b: 0, tx, c: 0, d: 1, ty };
+    }
+    
+    let sumXX = 0, sumXY = 0, sumX = 0, sumYY = 0, sumY = 0;
+    for (let i = 0; i < N; i++) {
+        const x = srcPts[i].x, y = srcPts[i].y;
+        sumXX += x*x; sumXY += x*y; sumX += x; sumYY += y*y; sumY += y;
+    }
+    const PTP = [
+        [sumXX, sumXY, sumX],
+        [sumXY, sumYY, sumY],
+        [sumX,  sumY,  N   ]
+    ];
+    const PTP_inv = invert3x3(PTP);
+    if (!PTP_inv) return null;
+    
+    let PTQx = [0, 0, 0], PTQy = [0, 0, 0];
+    for (let i = 0; i < N; i++) {
+        const x = srcPts[i].x, y = srcPts[i].y, qx = dstPts[i].x, qy = dstPts[i].y;
+        PTQx[0] += x*qx; PTQx[1] += y*qx; PTQx[2] += qx;
+        PTQy[0] += x*qy; PTQy[1] += y*qy; PTQy[2] += qy;
+    }
+    
+    const a = PTP_inv[0][0]*PTQx[0] + PTP_inv[0][1]*PTQx[1] + PTP_inv[0][2]*PTQx[2];
+    const b = PTP_inv[1][0]*PTQx[0] + PTP_inv[1][1]*PTQx[1] + PTP_inv[1][2]*PTQx[2];
+    const tx = PTP_inv[2][0]*PTQx[0] + PTP_inv[2][1]*PTQx[1] + PTP_inv[2][2]*PTQx[2];
+    
+    const c = PTP_inv[0][0]*PTQy[0] + PTP_inv[0][1]*PTQy[1] + PTP_inv[0][2]*PTQy[2];
+    const d = PTP_inv[1][0]*PTQy[0] + PTP_inv[1][1]*PTQy[1] + PTP_inv[1][2]*PTQy[2];
+    const ty = PTP_inv[2][0]*PTQy[0] + PTP_inv[2][1]*PTQy[1] + PTP_inv[2][2]*PTQy[2];
+    
+    return { a, b, tx, c, d, ty };
+}
+
+// Warp using nearest neighbor
+function warpAffineNearest(srcImgData, dstWidth, dstHeight, M) {
+    const dst = new Uint8ClampedArray(dstWidth * dstHeight * 4);
+    const src = srcImgData.data;
+    const sw = srcImgData.width, sh = srcImgData.height;
+    
+    for (let dy = 0; dy < dstHeight; dy++) {
+        for (let dx = 0; dx < dstWidth; dx++) {
+            // Map dst -> src
+            const sx = Math.round(M.a * dx + M.b * dy + M.tx);
+            const sy = Math.round(M.c * dx + M.d * dy + M.ty);
+            const dstIdx = (dy * dstWidth + dx) * 4;
+            
+            if (sx >= 0 && sx < sw && sy >= 0 && sy < sh) {
+                const srcIdx = (sy * sw + sx) * 4;
+                dst[dstIdx]   = src[srcIdx];
+                dst[dstIdx+1] = src[srcIdx+1];
+                dst[dstIdx+2] = src[srcIdx+2];
+                dst[dstIdx+3] = src[srcIdx+3];
+            } else {
+                dst[dstIdx] = 0; dst[dstIdx+1] = 0; dst[dstIdx+2] = 0; dst[dstIdx+3] = 255;
+            }
+        }
+    }
+    return new ImageData(dst, dstWidth, dstHeight);
+}
+
+// Morphological Erode (3x3 kernel)
+function erodeMask(mask, w, h) {
+    const eroded = new Uint8Array(mask.length);
+    for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+            const i = y * w + x;
+            if (mask[i] && mask[i-1] && mask[i+1] && mask[i-w] && mask[i+w] &&
+                mask[i-w-1] && mask[i-w+1] && mask[i+w-1] && mask[i+w+1]) {
+                eroded[i] = 1;
+            }
+        }
+    }
+    return eroded;
+}
+
+// CCL for masks
+function getDotProperties(binaryMask, width, height) {
+    const visited = new Uint8Array(width * height);
+    const dots = [];
+    
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const idx = y * width + x;
+            if (binaryMask[idx] === 1 && visited[idx] === 0) {
+                const queue = [idx];
+                visited[idx] = 1;
+                let sumX = 0, sumY = 0, count = 0;
+                let head = 0;
+                while (head < queue.length) {
+                    const curr = queue[head++];
+                    const px = curr % width, py = Math.floor(curr / width);
+                    sumX += px; sumY += py; count++;
+                    
+                    if (px + 1 < width) { const n = curr + 1; if (binaryMask[n] && !visited[n]) { visited[n] = 1; queue.push(n); } }
+                    if (px - 1 >= 0) { const n = curr - 1; if (binaryMask[n] && !visited[n]) { visited[n] = 1; queue.push(n); } }
+                    if (py + 1 < height) { const n = curr + width; if (binaryMask[n] && !visited[n]) { visited[n] = 1; queue.push(n); } }
+                    if (py - 1 >= 0) { const n = curr - width; if (binaryMask[n] && !visited[n]) { visited[n] = 1; queue.push(n); } }
+                }
+                if (count > 100) dots.push({ cx: sumX / count, cy: sumY / count, area: count });
+            }
+        }
+    }
+    
+    // Sort top-to-bottom, left-to-right
+    dots.sort((a, b) => {
+        if (Math.abs(a.cy - b.cy) > 20) return a.cy - b.cy;
+        return a.cx - b.cx;
+    });
+    return dots;
 }
 
 // 1. Initial Database Loading
 async function initDatabase() {
     try {
-        loadingOverlay.style.opacity = "1";
-        loadingOverlay.style.display = "flex";
+        loadingOverlay.classList.remove("hidden");
         
         loadingText.textContent = "Fetching index mapping...";
         const indexRes = await fetch("jacket_index.json");
         if (!indexRes.ok) throw new Error("Failed to load jacket_index.json");
         jacketNames = await indexRes.json();
-        console.log(`Loaded ${jacketNames.length} song names.`);
+        matchCountBadge.textContent = `${jacketNames.length} DB`;
         
         loadingText.textContent = "Downloading sprite sheet (~3.5 MB)...";
         const spriteImg = new Image();
         spriteImg.src = "jackets_sprite.webp";
+        await new Promise((resolve, reject) => { spriteImg.onload = resolve; spriteImg.onerror = reject; });
         
-        await new Promise((resolve, reject) => {
-            spriteImg.onload = resolve;
-            spriteImg.onerror = reject;
-        });
+        // Cache sprite raw pixels
+        spriteCanvas = document.createElement("canvas");
+        spriteCanvas.width = spriteImg.width;
+        spriteCanvas.height = spriteImg.height;
+        const sCtx = spriteCanvas.getContext("2d", { willReadFrequently: true });
+        sCtx.drawImage(spriteImg, 0, 0);
         
-        spriteImageLoaded = spriteImg; // Cache globally
+        loadingText.textContent = "Processing masks and pre-computing NCC vectors...";
+        await prepareMaskConfigs(sCtx);
         
-        loadingText.textContent = "Pre-processing database pixels...";
-        
-        // Draw sprite to an offscreen canvas to get pixels
-        const canvas = document.createElement("canvas");
-        canvas.width = spriteImg.width;
-        canvas.height = spriteImg.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(spriteImg, 0, 0);
-        
-        const numJackets = jacketNames.length;
-        // Each jacket will have pre-normalized RGB values (3 floats per pixel)
-        databaseNormalizedPixels = new Float32Array(numJackets * maskPixelCount * 3);
-        
-        for (let i = 0; i < numJackets; i++) {
-            const col = i % SPRITE_COLS;
-            const row = Math.floor(i / SPRITE_COLS);
-            const sx = col * GRID_W;
-            const sy = row * GRID_H;
-            
-            // Extract grid pixel data
-            const imgData = ctx.getImageData(sx, sy, GRID_W, GRID_H).data;
-            
-            // Filter pixels under the eroded mask
-            const rChannel = [];
-            const gChannel = [];
-            const bChannel = [];
-            
-            for (let idx = 0; idx < GRID_W * GRID_H; idx++) {
-                if (erodedMask[idx] === 1) {
-                    rChannel.push(imgData[idx * 4]);
-                    gChannel.push(imgData[idx * 4 + 1]);
-                    bChannel.push(imgData[idx * 4 + 2]);
-                }
-            }
-            
-            // Calculate mean and std for each channel
-            const getStats = (channel) => {
-                const sum = channel.reduce((a, b) => a + b, 0);
-                const mean = sum / channel.length;
-                const variance = channel.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / channel.length;
-                const std = Math.sqrt(variance) + 1e-6;
-                return { mean, std };
-            };
-            
-            const rStats = getStats(rChannel);
-            const gStats = getStats(gChannel);
-            const bStats = getStats(bChannel);
-            
-            // Write normalized pixels to global database buffer
-            const offset = i * maskPixelCount * 3;
-            for (let idx = 0; idx < maskPixelCount; idx++) {
-                databaseNormalizedPixels[offset + idx * 3]     = (rChannel[idx] - rStats.mean) / rStats.std;
-                databaseNormalizedPixels[offset + idx * 3 + 1] = (gChannel[idx] - gStats.mean) / gStats.std;
-                databaseNormalizedPixels[offset + idx * 3 + 2] = (bChannel[idx] - bStats.mean) / bStats.std;
-            }
-        }
-        
-        console.log("Database pre-processing complete!");
         databaseLoaded = true;
-        updateStatus("success", "Database Ready");
-        
-        // Hide loading overlay
-        loadingOverlay.style.opacity = "0";
-        setTimeout(() => loadingOverlay.style.display = "none", 500);
+        loadingOverlay.classList.add("hidden");
         
     } catch (err) {
         console.error(err);
         loadingText.textContent = "Initialization failed. Check console errors.";
-        updateStatus("warning", "Load Error");
     }
 }
 
-// 2. Camera Access Configuration
+async function prepareMaskConfigs(sCtx) {
+    const maskFiles = ["5-dot", "3-dot", "1-dot"];
+    
+    for (const name of maskFiles) {
+        const maskImg = new Image();
+        maskImg.src = `masks/${name}-mask.png`;
+        await new Promise((resolve) => { maskImg.onload = resolve; });
+        
+        const mCanvas = document.createElement("canvas");
+        mCanvas.width = 224; mCanvas.height = 224;
+        const mCtx = mCanvas.getContext("2d");
+        mCtx.drawImage(maskImg, 0, 0, 224, 224);
+        
+        const maskData = mCtx.getImageData(0, 0, 224, 224).data;
+        const binary224 = new Uint8Array(224 * 224);
+        for (let i = 0; i < 224 * 224; i++) {
+            // Convert to grayscale and threshold > 127
+            const gray = (maskData[i*4] + maskData[i*4+1] + maskData[i*4+2]) / 3;
+            binary224[i] = gray > 127 ? 1 : 0;
+        }
+        
+        const templateDots = getDotProperties(binary224, 224, 224);
+        
+        // Erode twice
+        const eroded224 = erodeMask(erodeMask(binary224, 224, 224), 224, 224);
+        
+        // Build 80x120 eroded mask from the 40x40 patches around centroids
+        const eroded80x120 = new Uint8Array(GRID_W * GRID_H);
+        let pixelCount = 0;
+        
+        for (let i = 0; i < templateDots.length; i++) {
+            const td = templateDots[i];
+            const slot = GRID_SLOTS[i];
+            for (let dy = -20; dy < 20; dy++) {
+                for (let dx = -20; dx < 20; dx++) {
+                    const mx = Math.round(td.cx) + dx;
+                    const my = Math.round(td.cy) + dy;
+                    const gx = slot.x + dx;
+                    const gy = slot.y + dy;
+                    if (mx >= 0 && mx < 224 && my >= 0 && my < 224 && gx >= 0 && gx < GRID_W && gy >= 0 && gy < GRID_H) {
+                        const val = eroded224[my * 224 + mx];
+                        eroded80x120[gy * GRID_W + gx] = val;
+                        if (val) pixelCount++;
+                    }
+                }
+            }
+        }
+        
+        // Pre-normalize the database for this mask
+        const numJackets = jacketNames.length;
+        const dbNorms = new Float32Array(numJackets * pixelCount * 3);
+        
+        for (let j = 0; j < numJackets; j++) {
+            const col = j % SPRITE_COLS;
+            const row = Math.floor(j / SPRITE_COLS);
+            const imgData = sCtx.getImageData(col * GRID_W, row * GRID_H, GRID_W, GRID_H).data;
+            
+            const rChannel = [], gChannel = [], bChannel = [];
+            for (let idx = 0; idx < GRID_W * GRID_H; idx++) {
+                if (eroded80x120[idx]) {
+                    rChannel.push(imgData[idx*4]);
+                    gChannel.push(imgData[idx*4+1]);
+                    bChannel.push(imgData[idx*4+2]);
+                }
+            }
+            
+            // Center and divide by L2 norm to make true NCC a simple dot product
+            const normalize = (channel) => {
+                const mean = channel.reduce((a, b) => a + b, 0) / channel.length;
+                const centered = channel.map(v => v - mean);
+                const sumSq = centered.reduce((a, b) => a + b*b, 0);
+                const norm = Math.sqrt(sumSq) || 1e-6;
+                return centered.map(v => v / norm);
+            };
+            
+            const rNorm = normalize(rChannel);
+            const gNorm = normalize(gChannel);
+            const bNorm = normalize(bChannel);
+            
+            const offset = j * pixelCount * 3;
+            for (let idx = 0; idx < pixelCount; idx++) {
+                dbNorms[offset + idx*3]     = rNorm[idx];
+                dbNorms[offset + idx*3 + 1] = gNorm[idx];
+                dbNorms[offset + idx*3 + 2] = bNorm[idx];
+            }
+        }
+        
+        maskConfigs[name] = { templateDots, eroded80x120, pixelCount, dbNorms };
+    }
+}
+
+// 2. Camera Access
 async function setupCameras() {
     try {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(device => device.kind === "videoinput");
+        const videoDevices = devices.filter(d => d.kind === "videoinput");
         
         cameraSelect.innerHTML = "";
         if (videoDevices.length === 0) {
@@ -196,41 +321,28 @@ async function setupCameras() {
             const option = document.createElement("option");
             option.value = device.deviceId;
             option.text = device.label || `Camera ${index + 1}`;
-            // Prioritize back camera on mobile
             if (device.label.toLowerCase().includes("back") || device.label.toLowerCase().includes("rear")) {
                 option.selected = true;
             }
             cameraSelect.appendChild(option);
         });
         
-        // Start streaming
         await startCamera(cameraSelect.value);
-        
-        cameraSelect.onchange = async () => {
-            await startCamera(cameraSelect.value);
-        };
-        
+        cameraSelect.onchange = async () => await startCamera(cameraSelect.value);
     } catch (err) {
         console.error("Camera detection error:", err);
     }
 }
 
 async function startCamera(deviceId) {
-    if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-    }
-    
+    if (videoStream) videoStream.getTracks().forEach(t => t.stop());
     const constraints = {
         video: deviceId ? { deviceId: { exact: deviceId }, width: 480, height: 480 } : { facingMode: "environment", width: 480, height: 480 }
     };
-    
     try {
         videoStream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = videoStream;
-        video.onloadedmetadata = () => {
-            video.play();
-            resizeCanvas();
-        };
+        video.onloadedmetadata = () => { video.play(); resizeCanvas(); };
     } catch (err) {
         console.error("Error accessing camera:", err);
     }
@@ -242,322 +354,185 @@ function resizeCanvas() {
     drawOverlay();
 }
 
-// 3. Draw Target Overlay Box and Dots
+// 3. Target Overlay
 function drawOverlay() {
-    const w = overlayCanvas.width;
-    const h = overlayCanvas.height;
+    const w = overlayCanvas.width, h = overlayCanvas.height;
     overlayCtx.clearRect(0, 0, w, h);
     
-    // Draw target bounding box (centered, 85% of width)
     const boxSize = Math.min(w, h) * 0.85;
-    const bx = (w - boxSize) / 2;
-    const by = (h - boxSize) / 2;
+    const bx = (w - boxSize) / 2, by = (h - boxSize) / 2;
     
-    overlayCtx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+    overlayCtx.strokeStyle = "rgba(99, 102, 241, 0.5)";
     overlayCtx.lineWidth = 2;
     overlayCtx.strokeRect(bx, by, boxSize, boxSize);
     
-    // Highlight corners
-    overlayCtx.fillStyle = "var(--primary)";
-    const cornerSize = 15;
-    // Top-Left
-    overlayCtx.fillRect(bx, by, cornerSize, 4);
-    overlayCtx.fillRect(bx, by, 4, cornerSize);
-    // Top-Right
-    overlayCtx.fillRect(bx + boxSize - cornerSize, by, cornerSize, 4);
-    overlayCtx.fillRect(bx + boxSize - 4, by, 4, cornerSize);
-    // Bottom-Left
-    overlayCtx.fillRect(bx, by + boxSize - 4, cornerSize, 4);
-    overlayCtx.fillRect(bx, by + boxSize - cornerSize, 4, cornerSize);
-    // Bottom-Right
-    overlayCtx.fillRect(bx + boxSize - cornerSize, by + boxSize - 4, cornerSize, 4);
-    overlayCtx.fillRect(bx + boxSize - 4, by + boxSize - cornerSize, 4, cornerSize);
+    // Draw alignment circle overlays based on active mask
+    if (!maskConfigs[activeMaskName]) return;
+    const dots = maskConfigs[activeMaskName].templateDots;
     
-    // Draw alignment circle overlays
-    const dots = getActiveTemplateDots();
-    overlayCtx.fillStyle = "rgba(0, 255, 170, 0.2)";
-    overlayCtx.strokeStyle = "rgba(0, 255, 170, 0.7)";
+    overlayCtx.fillStyle = "rgba(16, 185, 129, 0.3)";
+    overlayCtx.strokeStyle = "rgba(16, 185, 129, 0.8)";
     overlayCtx.lineWidth = 1.5;
     
     for (const dot of dots) {
         const dx = bx + (dot.cx / 224) * boxSize;
         const dy = by + (dot.cy / 224) * boxSize;
-        const r = (19 / 224) * boxSize; // Radius corresponding to diameter ~38 px
-        
+        const r = (19 / 224) * boxSize;
         overlayCtx.beginPath();
         overlayCtx.arc(dx, dy, r, 0, 2 * Math.PI);
-        overlayCtx.fill();
-        overlayCtx.stroke();
+        overlayCtx.fill(); overlayCtx.stroke();
     }
 }
 
-function getActiveTemplateDots() {
-    if (activeMaskName === "5-dot") {
-        return TEMPLATE_DOTS_ALL;
-    } else if (activeMaskName === "3-dot") {
-        // Top-Left, Center, Bottom-Right
-        return [TEMPLATE_DOTS_ALL[0], TEMPLATE_DOTS_ALL[2], TEMPLATE_DOTS_ALL[4]];
-    } else {
-        // Center only
-        return [TEMPLATE_DOTS_ALL[2]];
-    }
-}
-
-// 4. Connected Components Labeling (CCL)
-function findQueryCentroids(binaryMask, width, height) {
-    const visited = new Uint8Array(width * height);
-    const components = [];
-    
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const idx = y * width + x;
-            if (binaryMask[idx] === 1 && visited[idx] === 0) {
-                // BFS to label component
-                const queue = [idx];
-                visited[idx] = 1;
-                let sumX = 0;
-                let sumY = 0;
-                let count = 0;
-                
-                let head = 0;
-                while (head < queue.length) {
-                    const curr = queue[head++];
-                    const px = curr % width;
-                    const py = Math.floor(curr / width);
-                    sumX += px;
-                    sumY += py;
-                    count++;
-                    
-                    // Check 4 neighbors
-                    if (px + 1 < width) {
-                        const nidx = curr + 1;
-                        if (binaryMask[nidx] === 1 && visited[nidx] === 0) { visited[nidx] = 1; queue.push(nidx); }
-                    }
-                    if (px - 1 >= 0) {
-                        const nidx = curr - 1;
-                        if (binaryMask[nidx] === 1 && visited[nidx] === 0) { visited[nidx] = 1; queue.push(nidx); }
-                    }
-                    if (py + 1 < height) {
-                        const nidx = curr + width;
-                        if (binaryMask[nidx] === 1 && visited[nidx] === 0) { visited[nidx] = 1; queue.push(nidx); }
-                    }
-                    if (py - 1 >= 0) {
-                        const nidx = curr - width;
-                        if (binaryMask[nidx] === 1 && visited[nidx] === 0) { visited[nidx] = 1; queue.push(nidx); }
-                    }
-                }
-                
-                if (count > 70) { // Area threshold
-                    components.push({
-                        cx: sumX / count,
-                        cy: sumY / count,
-                        area: count
-                    });
-                }
-            }
-        }
-    }
-    
-    // Sort by area descending
-    components.sort((a, b) => b.area - a.area);
-    return components.slice(0, 5); // return top 5
-}
-
-// 5. Query Preprocessing, Alignment, and Matching
+// 4. Query Processing & NCC Match
 function processQueryFrame() {
     if (!databaseLoaded) return;
     
-    // 1. Get query frame pixels on offscreen canvas
-    if (!isStaticMode) {
-        const vw = video.videoWidth;
-        const vh = video.videoHeight;
-        if (vw === 0 || vh === 0) return;
-        
-        const boxSize = Math.min(vw, vh) * 0.85;
-        const sx = (vw - boxSize) / 2;
-        const sy = (vh - boxSize) / 2;
-        
-        offCtx.drawImage(video, sx, sy, boxSize, boxSize, 0, 0, 224, 224);
-    }
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (vw === 0 || vh === 0) return;
     
-    // 2. Segment the dots dynamically
+    const boxSize = Math.min(vw, vh) * 0.85;
+    const sx = (vw - boxSize) / 2, sy = (vh - boxSize) / 2;
+    offCtx.drawImage(video, sx, sy, boxSize, boxSize, 0, 0, 224, 224);
+    
+    runMatchingPipeline();
+}
+
+function showStatus(msg) {
+    statusOverlay.textContent = msg;
+    statusOverlay.classList.remove("hidden");
+    // clear matches
+    matchesList.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${msg}</p></div>`;
+}
+
+function runMatchingPipeline() {
+    const config = maskConfigs[activeMaskName];
+    const templateDots = config.templateDots;
+    
+    // 1. Dynamic Background Sampling
     const imgData = offCtx.getImageData(0, 0, 224, 224);
     const pixels = imgData.data;
     
-    // Sample background color near corners (mean of four 10x10 corners)
     let sumR = 0, sumG = 0, sumB = 0, count = 0;
-    const sampleCorner = (cx, cy) => {
-        for (let dy = 0; dy < 10; dy++) {
-            for (let dx = 0; dx < 10; dx++) {
-                const idx = ((cy + dy) * 224 + (cx + dx)) * 4;
-                sumR += pixels[idx];
-                sumG += pixels[idx + 1];
-                sumB += pixels[idx + 2];
-                count++;
+    const sample = (cx, cy) => {
+        for (let dy=0; dy<10; dy++) {
+            for (let dx=0; dx<10; dx++) {
+                const i = ((cy+dy)*224 + (cx+dx)) * 4;
+                sumR += pixels[i]; sumG += pixels[i+1]; sumB += pixels[i+2]; count++;
             }
         }
     };
-    sampleCorner(0, 0);
-    sampleCorner(224 - 10, 0);
-    sampleCorner(0, 224 - 10);
-    sampleCorner(224 - 10, 224 - 10);
+    sample(0, 0); sample(214, 0); sample(0, 214); sample(214, 214);
+    const bgR = sumR/count, bgG = sumG/count, bgB = sumB/count;
     
-    const bgR = sumR / count;
-    const bgG = sumG / count;
-    const bgB = sumB / count;
-    
-    // Threshold color distance from background
+    // 2. Segment dots (Dist > 70)
     const binaryMask = new Uint8Array(224 * 224);
     for (let i = 0; i < 224 * 224; i++) {
-        const r = pixels[i * 4];
-        const g = pixels[i * 4 + 1];
-        const b = pixels[i * 4 + 2];
-        const dist = Math.sqrt((r - bgR)**2 + (g - bgG)**2 + (b - bgB)**2);
+        const r = pixels[i*4], g = pixels[i*4+1], b = pixels[i*4+2];
+        const dist = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2);
         binaryMask[i] = dist > 70 ? 1 : 0;
     }
     
-    // 3. Find Centroids & Match uniquely using Greedy pairing
-    const queryCentroids = findQueryCentroids(binaryMask, 224, 224);
-    const activeTemplateDots = getActiveTemplateDots();
-    const M = activeTemplateDots.length;
-    
-    if (queryCentroids.length < M) {
-        updateStatus("warning", `Aligning (${queryCentroids.length}/${M} dots)`);
-        // If we haven't displayed anything yet, show waiting state.
-        // Otherwise, keep displaying lastMatches to prevent UI flashing!
-        if (lastMatchingResults.length === 0) {
-            displayMessage(`Waiting for query alignment (${queryCentroids.length}/${M} dots)...`);
-        }
+    // 3. Find Query Centroids
+    const queryDots = getDotProperties(binaryMask, 224, 224);
+    if (queryDots.length < templateDots.length) {
+        showStatus(`Align all ${templateDots.length} dots...`);
         return;
     }
+    statusOverlay.classList.add("hidden");
     
-    updateStatus("success", isStaticMode ? "Static Image Mode" : "Live Matching");
+    // Take largest N dots and match to template using NN
+    queryDots.sort((a, b) => b.area - a.area);
+    const topQueryDots = queryDots.slice(0, templateDots.length);
     
-    // Greedy unique nearest assignment
-    const matchedQueryDots = new Array(activeTemplateDots.length).fill(null);
-    const usedQueryIndices = new Set();
-    
-    for (let i = 0; i < activeTemplateDots.length; i++) {
-        const td = activeTemplateDots[i];
-        let minDist = Infinity;
-        let closestIdx = -1;
-        
-        for (let j = 0; j < queryCentroids.length; j++) {
-            if (usedQueryIndices.has(j)) continue;
-            const qc = queryCentroids[j];
-            const dist = Math.sqrt((qc.cx - td.cx)**2 + (qc.cy - td.cy)**2);
-            if (dist < minDist) {
-                minDist = dist;
-                closestIdx = j;
-            }
+    const srcPts = [], dstPts = []; // We map Template (src) -> Query (dst)
+    for (const td of templateDots) {
+        let minDist = Infinity, closestQ = null;
+        for (const qd of topQueryDots) {
+            const d = Math.hypot(qd.cx - td.cx, qd.cy - td.cy);
+            if (d < minDist) { minDist = d; closestQ = qd; }
         }
-        if (closestIdx !== -1) {
-            matchedQueryDots[i] = queryCentroids[closestIdx];
-            usedQueryIndices.add(closestIdx);
-        }
+        srcPts.push({x: td.cx, y: td.cy});
+        dstPts.push({x: closestQ.cx, y: closestQ.cy});
     }
     
-    // Calculate average translation offsets dx, dy
-    let sumDx = 0, sumDy = 0;
-    for (let i = 0; i < M; i++) {
-        sumDx += activeTemplateDots[i].cx - matchedQueryDots[i].cx;
-        sumDy += activeTemplateDots[i].cy - matchedQueryDots[i].cy;
-    }
-    const dx = sumDx / M;
-    const dy = sumDy / M;
+    // 4. Affine Alignment (Warp to perfectly align with templates)
+    const M = estimateAffine(srcPts, dstPts);
+    if (!M) return;
     
-    // 4. Build aligned query grid (120x80)
-    dqCtx.fillStyle = "#000000";
-    dqCtx.fillRect(0, 0, GRID_W, GRID_H);
+    // warpAffineNearest maps Template -> Query to sample pixels properly
+    const warpedData = warpAffineNearest(imgData, 224, 224, M);
     
-    // Draw the active dots into their grid slots
-    for (let i = 0; i < M; i++) {
-        const td = activeTemplateDots[i];
-        const slot = GRID_SLOTS[td.slot];
-        
-        // Crop PATCH_SIZE x PATCH_SIZE centered at template centroid (aligned)
-        const cropX = td.cx - dx - PATCH_SIZE / 2;
-        const cropY = td.cy - dy - PATCH_SIZE / 2;
-        
+    // 5. Build 80x120 Query Grid
+    dqCtx.fillStyle = "#000"; dqCtx.fillRect(0, 0, GRID_W, GRID_H);
+    
+    // Temporarily write warped data back to offscreen to drawImage crop
+    offCtx.putImageData(warpedData, 0, 0);
+    
+    for (let i = 0; i < templateDots.length; i++) {
+        const td = templateDots[i], slot = GRID_SLOTS[i];
+        const cx = Math.round(td.cx), cy = Math.round(td.cy);
         dqCtx.drawImage(
             offscreenCanvas,
-            cropX, cropY, PATCH_SIZE, PATCH_SIZE,
-            slot.x - PATCH_SIZE / 2, slot.y - PATCH_SIZE / 2, PATCH_SIZE, PATCH_SIZE
+            cx - 20, cy - 20, 40, 40,
+            slot.x - 20, slot.y - 20, 40, 40
         );
     }
     
-    // 5. Apply circular mask dynamically to query grid on canvas (blacking out corners)
+    // Apply visual black mask for debug canvas
     dqCtx.save();
-    dqCtx.globalCompositeOperation = "destination-in";
-    dqCtx.fillStyle = "#000000";
-    for (const slot of GRID_SLOTS) {
-        dqCtx.beginPath();
-        dqCtx.arc(slot.x, slot.y, erodedRadius, 0, 2 * Math.PI);
-        dqCtx.fill();
+    const queryGridData = dqCtx.getImageData(0, 0, GRID_W, GRID_H);
+    for (let i = 0; i < GRID_W * GRID_H; i++) {
+        if (!config.eroded80x120[i]) {
+            queryGridData.data[i*4] = 0;
+            queryGridData.data[i*4+1] = 0;
+            queryGridData.data[i*4+2] = 0;
+        }
     }
-    dqCtx.restore();
+    dqCtx.putImageData(queryGridData, 0, 0);
     
-    // 6. Extract query pixels under the mask and normalize
-    const queryGridData = dqCtx.getImageData(0, 0, GRID_W, GRID_H).data;
-    const queryR = [];
-    const queryG = [];
-    const queryB = [];
-    
-    for (let idx = 0; idx < GRID_W * GRID_H; idx++) {
-        if (erodedMask[idx] === 1) {
-            queryR.push(queryGridData[idx * 4]);
-            queryG.push(queryGridData[idx * 4 + 1]);
-            queryB.push(queryGridData[idx * 4 + 2]);
+    // 6. Extract pixels and normalize query
+    const qR = [], qG = [], qB = [];
+    for (let i = 0; i < GRID_W * GRID_H; i++) {
+        if (config.eroded80x120[i]) {
+            qR.push(queryGridData.data[i*4]);
+            qG.push(queryGridData.data[i*4+1]);
+            qB.push(queryGridData.data[i*4+2]);
         }
     }
     
-    const getStats = (channel) => {
-        const sum = channel.reduce((a, b) => a + b, 0);
-        const mean = sum / channel.length;
-        const variance = channel.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / channel.length;
-        const std = Math.sqrt(variance) + 1e-6;
-        return { mean, std };
+    const normalize = (channel) => {
+        const mean = channel.reduce((a, b) => a + b, 0) / channel.length;
+        const centered = channel.map(v => v - mean);
+        const sumSq = centered.reduce((a, b) => a + b*b, 0);
+        const norm = Math.sqrt(sumSq) || 1e-6;
+        return centered.map(v => v / norm);
     };
     
-    const qRStats = getStats(queryR);
-    const qGStats = getStats(queryG);
-    const qBStats = getStats(queryB);
+    const qRNorm = normalize(qR), qGNorm = normalize(qG), qBNorm = normalize(qB);
     
-    const queryNorm = new Float32Array(maskPixelCount * 3);
-    for (let idx = 0; idx < maskPixelCount; idx++) {
-        queryNorm[idx * 3]     = (queryR[idx] - qRStats.mean) / qRStats.std;
-        queryNorm[idx * 3 + 1] = (queryG[idx] - qGStats.mean) / qGStats.std;
-        queryNorm[idx * 3 + 2] = (queryB[idx] - qBStats.mean) / qBStats.std;
-    }
-    
-    // 7. Compute NCC against all database items
+    // 7. Compute True NCC (Dot Product of normalized vectors)
     const numJackets = jacketNames.length;
     const similarityResults = [];
+    const pixelCount = config.pixelCount;
+    const dbNorms = config.dbNorms;
     
     for (let j = 0; j < numJackets; j++) {
-        const dbOffset = j * maskPixelCount * 3;
-        let sumProd = 0;
+        const dbOffset = j * pixelCount * 3;
+        let sumProdR = 0, sumProdG = 0, sumProdB = 0;
         
-        for (let idx = 0; idx < maskPixelCount * 3; idx++) {
-            sumProd += queryNorm[idx] * databaseNormalizedPixels[dbOffset + idx];
+        for (let idx = 0; idx < pixelCount; idx++) {
+            sumProdR += qRNorm[idx] * dbNorms[dbOffset + idx*3];
+            sumProdG += qGNorm[idx] * dbNorms[dbOffset + idx*3 + 1];
+            sumProdB += qBNorm[idx] * dbNorms[dbOffset + idx*3 + 2];
         }
         
-        const score = sumProd / (maskPixelCount * 3);
+        const score = (sumProdR + sumProdG + sumProdB) / 3.0;
         similarityResults.push({ name: jacketNames[j], index: j, score });
     }
     
-    // Sort and rank matches
     similarityResults.sort((a, b) => b.score - a.score);
-    
-    // Cache last results
-    lastMatchingResults = similarityResults.slice(0, 3);
-    
-    // 8. Render Results UI
-    renderMatches(lastMatchingResults);
-}
-
-function displayMessage(msg) {
-    matchesList.innerHTML = `<div class="empty-state"><p>${msg}</p></div>`;
+    renderMatches(similarityResults.slice(0, 5));
 }
 
 function renderMatches(topMatches) {
@@ -565,62 +540,54 @@ function renderMatches(topMatches) {
     
     topMatches.forEach((match, index) => {
         const rankClass = index === 0 ? "rank-1" : "";
-        // Map score 0.0-1.0 to a nice progress bar percentage (using wider visual range)
-        const scorePercentage = Math.max(0, Math.min(100, (match.score - 0.2) / 0.8 * 100));
+        const scorePercentage = Math.max(0, Math.min(100, match.score * 100));
         
         const matchItem = document.createElement("div");
         matchItem.className = `match-item ${rankClass}`;
         
-        if (index === 0) {
-            drawRefGridToCanvas(match.index);
-        }
+        if (index === 0) drawRefGridToCanvas(match.index);
         
-        // Create canvas element for thumbnail (avoid loading individual jacket images from server)
+        const thumbUrl = `jackets/${encodeURIComponent(match.name)}`;
+        
         matchItem.innerHTML = `
             <div class="match-rank">${index + 1}</div>
-            <canvas class="match-thumbnail-canvas" width="80" height="120" style="width: 48px; height: 72px; border-radius: 6px; border: 1px solid var(--border-color); object-fit: cover; background: #000; flex-shrink: 0;"></canvas>
+            <img class="match-thumbnail" src="${thumbUrl}" alt="Jacket">
             <div class="match-info">
                 <div class="match-name" title="${match.name}">${match.name}</div>
                 <div class="score-container">
-                    <div class="score-bar-wrapper">
-                        <div class="score-bar" style="width: ${scorePercentage}%"></div>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
                     </div>
-                    <div class="score-text">${match.score.toFixed(5)}</div>
+                    <div class="score-text">${match.score.toFixed(4)}</div>
                 </div>
             </div>
         `;
-        
         matchesList.appendChild(matchItem);
-        
-        // Draw matched grid slice directly from cache to results canvas
-        const canvasEl = matchItem.querySelector(".match-thumbnail-canvas");
-        const ctxEl = canvasEl.getContext("2d");
-        
-        const col = match.index % SPRITE_COLS;
-        const row = Math.floor(match.index / SPRITE_COLS);
-        const sx = col * GRID_W;
-        const sy = row * GRID_H;
-        
-        if (spriteImageLoaded) {
-            ctxEl.drawImage(spriteImageLoaded, sx, sy, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
-        }
     });
 }
 
 function drawRefGridToCanvas(jacketIdx) {
-    // Draws the matched reference grid from sprite sheet image cache to debug canvas
+    if (!spriteCanvas) return;
     const col = jacketIdx % SPRITE_COLS;
     const row = Math.floor(jacketIdx / SPRITE_COLS);
-    const sx = col * GRID_W;
-    const sy = row * GRID_H;
     
-    drCtx.clearRect(0, 0, GRID_W, GRID_H);
-    if (spriteImageLoaded) {
-        drCtx.drawImage(spriteImageLoaded, sx, sy, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
+    drCtx.fillStyle = "#000"; drCtx.fillRect(0, 0, GRID_W, GRID_H);
+    drCtx.drawImage(spriteCanvas, col * GRID_W, row * GRID_H, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
+    
+    // Apply visual black mask
+    const config = maskConfigs[activeMaskName];
+    if (config) {
+        const refGridData = drCtx.getImageData(0, 0, GRID_W, GRID_H);
+        for (let i = 0; i < GRID_W * GRID_H; i++) {
+            if (!config.eroded80x120[i]) {
+                refGridData.data[i*4] = 0; refGridData.data[i*4+1] = 0; refGridData.data[i*4+2] = 0;
+            }
+        }
+        drCtx.putImageData(refGridData, 0, 0);
     }
 }
 
-// 6. Test Image Upload Handler (Local & Production Debugging Fallback)
+// 5. Test Image Upload
 function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -629,52 +596,29 @@ function handleFileUpload(e) {
     reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-            isStaticMode = true;
-            resetCameraBtn.style.display = "inline-block";
-            
-            // Draw static image to offscreen 224x224 canvas
             offCtx.clearRect(0, 0, 224, 224);
             offCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, 224, 224);
-            
-            // Force immediate processing
-            processQueryFrame();
+            runMatchingPipeline(); // Trigger once on upload
         };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
-    // Reset file input value so uploading the same file triggers change event
-    fileInput.value = "";
 }
 
-// 7. Reset to Live Camera Mode
-resetCameraBtn.addEventListener("click", () => {
-    isStaticMode = false;
-    resetCameraBtn.style.display = "none";
-    lastMatchingResults = [];
-    dqCtx.clearRect(0, 0, GRID_W, GRID_H);
-    drCtx.clearRect(0, 0, GRID_W, GRID_H);
-    displayMessage("Waiting for query feed...");
-    updateStatus("success", "Live Matching");
-});
-
-// 8. Event Listeners & Initialize
+// Event Listeners & Initialize
 maskSelect.addEventListener("change", (e) => {
     activeMaskName = e.target.value;
     drawOverlay();
-    // Clear results UI when mask changes
-    lastMatchingResults = [];
-    displayMessage("Waiting for query feed...");
+    showStatus("Waiting for query feed...");
 });
 
 fileInput.addEventListener("change", handleFileUpload);
 window.addEventListener("resize", resizeCanvas);
 
-// Initialize App
 async function init() {
     await initDatabase();
     await setupCameras();
-    
-    // Start real-time processing loop at 8 FPS (every 125ms) to save CPU
+    // Run at 8 FPS
     processingInterval = setInterval(processQueryFrame, 125);
 }
 

@@ -3,91 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jacket Searcher (Static WebApp)</title>
-    <!-- Google Fonts -->
+    <title>JacketSearch - BEMANI Quiz Solver</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Main Style -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
+    <div class="app-layout">
         <header class="app-header">
-            <h1 class="logo-text">JACKET<span>SEARCH</span></h1>
-            <p class="subtitle">BEMANI Dot-Reveal Quiz Solver</p>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🔍</span>
+                    <h1>Jacket<span class="accent">Search</span></h1>
+                </div>
+                <p class="subtitle">BEMANI Dot-Reveal Quiz Solver</p>
+            </div>
         </header>
 
-        <!-- Main Workspace -->
-        <main class="app-main">
-            <!-- Camera & Canvas Section -->
-            <div class="card camera-card">
-                <div class="card-header">
-                    <h2>Live Camera Capture <span id="status-badge" class="badge info">Detecting</span></h2>
-                    <div class="device-selectors">
-                        <select id="camera-select" class="dropdown-select">
-                            <option value="">Detecting cameras...</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="video-container">
-                    <video id="webcam-video" autoplay playsinline muted></video>
-                    <!-- Overlay Canvas for Drawing Alignment Dots -->
-                    <canvas id="overlay-canvas"></canvas>
-                    <div id="loading-overlay" class="loading-overlay">
-                        <div class="spinner"></div>
-                        <p id="loading-text">Loading database (0.0 MB)...</p>
-                    </div>
-                </div>
-                <!-- Control Panel -->
-                <div class="control-panel">
-                    <div class="control-group">
-                        <label for="mask-select">Quiz Stage (Mask):</label>
-                        <select id="mask-select" class="dropdown-select">
-                            <option value="5-dot" selected>5-Dot Reveal</option>
+        <main class="main-content">
+            <div class="panel vision-panel">
+                <div class="panel-header">
+                    <h2>Live Vision Feed</h2>
+                    <div class="controls">
+                        <select id="mask-select" class="control-select">
+                            <option value="5-dot">5-Dot Reveal</option>
                             <option value="3-dot">3-Dot Reveal</option>
-                            <option value="1-dot">1-Dot (Center) Reveal</option>
+                            <option value="1-dot">1-Dot Reveal</option>
+                        </select>
+                        <select id="camera-select" class="control-select">
+                            <option value="">Loading cameras...</option>
                         </select>
                     </div>
-                    <div class="control-group buttons-group">
-                        <label>Fallback upload:</label>
-                        <div class="file-upload-wrapper">
-                            <button class="btn btn-secondary">Upload Test Image</button>
-                            <input type="file" id="file-input" accept="image/*">
-                        </div>
-                        <button id="reset-camera-btn" class="btn btn-primary" style="display:none; margin-top: 5px;">Resume Live Camera</button>
+                </div>
+                <div class="video-wrapper">
+                    <video id="webcam-video" autoplay playsinline muted></video>
+                    <canvas id="overlay-canvas"></canvas>
+                    <div id="loading-overlay" class="overlay flex-center">
+                        <div class="spinner"></div>
+                        <p id="loading-text">Initializing...</p>
                     </div>
+                    <div id="status-overlay" class="overlay-text hidden"></div>
+                </div>
+                <div class="panel-footer">
+                    <div class="upload-btn-wrapper">
+                        <button class="btn primary-btn">Upload Test Image</button>
+                        <input type="file" id="file-input" accept="image/*">
+                    </div>
+                    <p class="hint-text">Or point your camera at the screen</p>
                 </div>
             </div>
 
-            <!-- Matching Results Section -->
-            <div class="card results-card">
-                <div class="card-header">
+            <div class="panel results-panel">
+                <div class="panel-header">
                     <h2>Best Matches</h2>
+                    <span class="badge" id="match-count-badge">0 DB</span>
                 </div>
-                <div class="matches-list" id="matches-list">
+                
+                <div id="matches-list" class="matches-container">
                     <div class="empty-state">
-                        <p>Waiting for query feed...</p>
+                        <div class="empty-icon">⏳</div>
+                        <p>Waiting for clear visual feed...</p>
                     </div>
                 </div>
-                <div class="debug-panel">
-                    <h3>Visual Match Details</h3>
-                    <div class="debug-canvas-wrapper">
-                        <div>
-                            <span class="label">Aligned Query Grid</span>
+
+                <div class="debug-section">
+                    <h3>Diagnostics</h3>
+                    <div class="debug-canvases">
+                        <div class="debug-item">
                             <canvas id="debug-query-canvas" width="80" height="120"></canvas>
+                            <span class="debug-label">Aligned Query</span>
                         </div>
-                        <div>
-                            <span class="label">Matched Reference Grid</span>
+                        <div class="debug-item">
                             <canvas id="debug-ref-canvas" width="80" height="120"></canvas>
+                            <span class="debug-label">Reference Match</span>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-    <!-- Core Application Logic -->
     <script src="app.js"></script>
 </body>
 </html>
