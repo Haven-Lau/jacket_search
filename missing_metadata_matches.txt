@@ -1,0 +1,852 @@
+--- Found Similar Matches ---
+Jacket: 10,000,000,000_(CLASSIC) -> Metadata Key: 10,000,000,000
+Jacket: 1n -> Metadata Key: n
+Jacket: 40°C_Desert -> Metadata Key: 40%C2%B0C_Desert
+Jacket: 5-10_old -> Metadata Key: 5-10
+Jacket: 800nm_old -> Metadata Key: 800nm
+Jacket: Across_the_nightmare_(CLASSIC) -> Metadata Key: Across_the_nightmare
+Jacket: Afterimage_d'automne -> Metadata Key: Afterimage_d%27automne
+Jacket: AFTER_A_HARD_DAY_old -> Metadata Key: AFTER_A_HARD_DAY
+Jacket: After_dark -> Metadata Key: In_the_dark
+Jacket: Agnus_Dei_(CLASSIC) -> Metadata Key: Agnus_Dei
+Jacket: Agnus_Dei_old -> Metadata Key: Agnus_Dei
+Jacket: Aithon_old -> Metadata Key: Aithon
+Jacket: Ai_no_tame_ni. -> Metadata Key: Kimi_no_tonari_ni...
+Jacket: Akai_suzu_old -> Metadata Key: Akai_suzu
+Jacket: Aka_to_ao_no_rampage_ReGLOSS -> Metadata Key: Aka_to_ao_no_rampage_(GITADORA_ver.)
+Jacket: Akogare_no_bodybuild!!_(CLASSIC) -> Metadata Key: Akogare_no_bodybuild!!
+Jacket: Amanojaku_NOV -> Metadata Key: Amanojaku
+Jacket: Ame_nochi_Hello_unused -> Metadata Key: Ame_nochi_Hello
+Jacket: Andante -> Metadata Key: Atalante
+Jacket: ANEMONE_-GITADORA_EDITION- -> Metadata Key: GAIA_-GITADORA_EDITION-
+Jacket: Angel_magic_old -> Metadata Key: Angel_magic
+Jacket: Arche_old -> Metadata Key: Arche
+Jacket: Arigato_ne._old -> Metadata Key: Arigato_ne.
+Jacket: Asakara_yoru_ni -> Metadata Key: Sayonara_dayori
+Jacket: Atalante_(CLASSIC) -> Metadata Key: Atalante
+Jacket: Atalante_old -> Metadata Key: Atalante
+Jacket: Ater_Regis -> Metadata Key: Ater_Regis_-Alius-
+Jacket: AXIS_old -> Metadata Key: AXIS
+Jacket: Balance -> Metadata Key: Blaze
+Jacket: Bangin'_Breaks -> Metadata Key: Bangin%27_Breaks
+Jacket: Baribari_boogie_~namida_no_fruit_punch~_old -> Metadata Key: Baribari_boogie_~namida_no_fruit_punch~
+Jacket: Beautiful_Life -> Metadata Key: Beautiful_Dream
+Jacket: Before_Daybreak_old -> Metadata Key: Before_Daybreak
+Jacket: Beginning_(BEMANI_Sound_Team__TAG_) -> Metadata Key: Beginning_(BEMANI_Sound_Team_%22TAG%22)
+Jacket: Believing_old -> Metadata Key: Believing
+Jacket: Bittersweet -> Metadata Key: Bitter_escape
+Jacket: Black_horizon_(CLASSIC) -> Metadata Key: Black_horizon
+Jacket: Black_horizon_old -> Metadata Key: Black_horizon
+Jacket: BLACK_NIGHT -> Metadata Key: POLAR_NIGHT
+Jacket: BLIND_old -> Metadata Key: BLIND
+Jacket: Blue_bird_old -> Metadata Key: Blue_bird
+Jacket: Blue_Earth -> Metadata Key: Blue_planet
+Jacket: Blue_Feather -> Metadata Key: Blue_planet
+Jacket: BOBBY_SUE_AND_SKINNY_JIM_(CLASSIC) -> Metadata Key: BOBBY_SUE_AND_SKINNY_JIM
+Jacket: BOBBY_SUE_AND_SKINNY_JIM_old -> Metadata Key: BOBBY_SUE_AND_SKINNY_JIM
+Jacket: Bonetrousle_GITADORA -> Metadata Key: Bonetrousle
+Jacket: BRAND_NEW_LADY_old -> Metadata Key: BRAND_NEW_LADY
+Jacket: Brave! -> Metadata Key: Truare!
+Jacket: BREAK_DOWN!_(GF&DM_STYLE) -> Metadata Key: BREAK_DOWN!_(GF%26DM_STYLE)
+Jacket: BREAK_DOWN!_(GF&DM_STYLE)_(CLASSIC) -> Metadata Key: BREAK_DOWN!_(GF%26DM_STYLE)
+Jacket: Break_on_Through -> Metadata Key: Break_Down_(Maro)
+Jacket: BREAK_OUT_old -> Metadata Key: BREAK_OUT
+Jacket: BRIGHT_STREAM -> Metadata Key: RIGHT_ON_TIME
+Jacket: BRING_BACK -> Metadata Key: SPRING_BAZOOKA
+Jacket: Burnt -> Metadata Key: Buranko
+Jacket: CALAMITY_PHOENIX_(CLASSIC) -> Metadata Key: CALAMITY_PHOENIX
+Jacket: CAPTAIN'S_VOYAGE -> Metadata Key: CAPTAIN%27S_VOYAGE
+Jacket: CAPTAIN'S_VOYAGE_(CLASSIC) -> Metadata Key: CAPTAIN%27S_VOYAGE
+Jacket: CAPTAIN'S_VOYAGE_old -> Metadata Key: CAPTAIN%27S_VOYAGE
+Jacket: CaptivAte~sabaki~_(CLASSIC) -> Metadata Key: CaptivAte~sabaki~
+Jacket: CAPUTURING_XANADU -> Metadata Key: CAPTURING_XANADU
+Jacket: Casino_fire_Kotomi-chan_ReGLOSS -> Metadata Key: Casino_fire_Kotomi-chan_(GITADORA_ver.)
+Jacket: CHAIN_REACTION_feat.NO+CHIN -> Metadata Key: CHAIN_REACTION_feat.NO%2BCHIN
+Jacket: Champione -> Metadata Key: Chance
+Jacket: Charismatic_old -> Metadata Key: Charismatic
+Jacket: Cherry -> Metadata Key: Cranberry
+Jacket: CHIMERA_old -> Metadata Key: CHIMERA
+Jacket: Chotto -> Metadata Key: Sotto.
+Jacket: Chronos_old -> Metadata Key: Chronos
+Jacket: Circles -> Metadata Key: Icicles
+Jacket: Circle_coaster -> Metadata Key: Jet_coaster_girl
+Jacket: CLASSIC_PARTY_3_(CLASSIC) -> Metadata Key: CLASSIC_PARTY_3
+Jacket: CLASSIC_PARTY_fukkatsu -> Metadata Key: CLASSIC_PARTY_fukkatsu.
+Jacket: CLASSIC_PARTY_fukkatsu._old -> Metadata Key: CLASSIC_PARTY_fukkatsu.
+Jacket: CLASSIC_PARTY_triathlon_old -> Metadata Key: CLASSIC_PARTY_triathlon
+Jacket: Clear_wings_MXM -> Metadata Key: Clear:wings
+Jacket: Colorful_pastel_(CLASSIC) -> Metadata Key: Colorful_pastel
+Jacket: Colors_GITADORA -> Metadata Key: Sola_GITADORA_ver.
+Jacket: COMPLETE_CONQUEST -> Metadata Key: ENCORE_CONQUEST
+Jacket: Concertino_in_Blue_(CLASSIC) -> Metadata Key: Concertino_in_Blue
+Jacket: Confession_(Takao_Nagatani)_old -> Metadata Key: Confession_(Takao_Nagatani)
+Jacket: COSMIC_COWGIRL_(CLASSIC) -> Metadata Key: COSMIC_COWGIRL
+Jacket: COSMIC_COWGIRL_(Long_Version) -> Metadata Key: COSMIC_COWGIRL
+Jacket: Country_day_old -> Metadata Key: Country_day
+Jacket: CRAZY_FOR_YOU -> Metadata Key: SMILE_FOR_YOU
+Jacket: Crescent_Letter -> Metadata Key: Crescent:Letter
+Jacket: CRIES_IN_THE_WILDERNESS_old -> Metadata Key: CRIES_IN_THE_WILDERNESS
+Jacket: Daikenkai_GFDM -> Metadata Key: Daikenkai
+Jacket: Dakara_kimi_janai -> Metadata Key: Dakara_kimi_janai.
+Jacket: Dance_the_Night_Away -> Metadata Key: Dance_the_night_away
+Jacket: Dance_the_Night_Away_old -> Metadata Key: Dance_the_night_away
+Jacket: Dare -> Metadata Key: Dare%3F
+Jacket: Dare_old -> Metadata Key: Marigold
+Jacket: Darling_my_LUV_old -> Metadata Key: Darling_my_LUV
+Jacket: Day's! -> Metadata Key: Day%27s!
+Jacket: DAY_DREAM_(CLASSIC) -> Metadata Key: DAY_DREAM
+Jacket: DEADMAN'S_BED -> Metadata Key: DEADMAN%27S_BED
+Jacket: DEADMAN'S_BED_old -> Metadata Key: DEADMAN%27S_BED
+Jacket: Dedication_old -> Metadata Key: Dedication
+Jacket: DELIGHT -> Metadata Key: PRIME_LIGHT
+Jacket: Dendenpassion -> Metadata Key: Dedication
+Jacket: DEPARTURE_old -> Metadata Key: DEPARTURE
+Jacket: DEPEND_ON_ME_(Long_Version) -> Metadata Key: DEPEND_ON_ME_(CD_Version)
+Jacket: Desert_rain -> Metadata Key: Desert_Rose
+Jacket: Destroy_march_NOV -> Metadata Key: Destroy_march
+Jacket: Destructive_Wave_old -> Metadata Key: Destructive_Wave
+Jacket: Devil's_Rule -> Metadata Key: Devil%27s_Rule
+Jacket: Die_Zauberflote_(CLASSIC) -> Metadata Key: Die_Zauberflote
+Jacket: Din_Don_Dan -> Metadata Key: Ding_Dong_Bell
+Jacket: Discommunication -> Metadata Key: Dedication
+Jacket: DOKI_DOKI_old -> Metadata Key: DOKI_DOKI
+Jacket: DOKI_DOKI_PUFFY -> Metadata Key: DOKI_DOKI
+Jacket: Don't_Break_Up -> Metadata Key: Don%27t_Break_Up
+Jacket: DOUBLE_ORBIT -> Metadata Key: DOUBLE_IMPACT
+Jacket: Double_Trouble_old -> Metadata Key: Double_Trouble
+Jacket: Dragon_Blade_(CLASSIC) -> Metadata Key: Dragon_Blade
+Jacket: Dragon_Blade_jubeat -> Metadata Key: Dragon_Blade
+Jacket: Dragon_Blade_old -> Metadata Key: Dragon_Blade
+Jacket: Dreamer's_High -> Metadata Key: Dreamer%27s_High
+Jacket: Dreams_in_the_night_old -> Metadata Key: Dreams_in_the_night
+Jacket: DREAM_RUSH_old -> Metadata Key: DREAM_RUSH
+Jacket: Driven_Shooter_old -> Metadata Key: Driven_Shooter
+Jacket: Dynamis_old -> Metadata Key: Dynamis
+Jacket: E-MAIL_ME!_old -> Metadata Key: E-MAIL_ME!
+Jacket: ECLIPSE -> Metadata Key: ECLIPSE_2
+Jacket: Einherjar_(CLASSIC) -> Metadata Key: Einherjar
+Jacket: Electric_Lady_old -> Metadata Key: Electric_Lady
+Jacket: Electric_Sun -> Metadata Key: Electric_Lady
+Jacket: El_Dorado_(CLASSIC) -> Metadata Key: El_Dorado
+Jacket: El_Dorado_old -> Metadata Key: El_Dorado
+Jacket: EMPIRE_OF_FLAME_EXH -> Metadata Key: EMPIRE_OF_FLAME
+Jacket: ENCORE_CONQUEST_unused -> Metadata Key: ENCORE_CONQUEST
+Jacket: Endless_Chain -> Metadata Key: Endless_cruising
+Jacket: Escape_(Chelsy) -> Metadata Key: Escape_Velocity
+Jacket: Excavation_Damage_(CLASSIC) -> Metadata Key: Excavation_Damage
+Jacket: EXCELSIOR_DIVE_(CLASSIC) -> Metadata Key: EXCELSIOR_DIVE
+Jacket: Factor_of_adhesion_jk -> Metadata Key: Factor_of_adhesion
+Jacket: Fairy_Tales_old -> Metadata Key: Fairy_Tales
+Jacket: Fantasista -> Metadata Key: Sanagi_sai
+Jacket: Far_Beyond_Blackened_old -> Metadata Key: Far_Beyond_Blackened
+Jacket: Fast_Forward -> Metadata Key: Step_forward
+Jacket: Fat_Lip -> Metadata Key: Fat_snail
+Jacket: FEEL_the_BREEZE_old -> Metadata Key: FEEL_the_BREEZE
+Jacket: FEEL_THE_EARTH_old -> Metadata Key: FEEL_THE_EARTH
+Jacket: FIGHT_FOR_YOUR_LIFE_old -> Metadata Key: FIGHT_FOR_YOUR_LIFE
+Jacket: First_Date_old -> Metadata Key: First_Date
+Jacket: Flip_book_story -> Metadata Key: Flip_book*story
+Jacket: Flow_old -> Metadata Key: Flow
+Jacket: FORCE_Interval_Build_old -> Metadata Key: FORCE_Interval_Build
+Jacket: Forever_free_old -> Metadata Key: Forever_free
+Jacket: FOR_THE_FINAL_(CLASSIC) -> Metadata Key: FOR_THE_FINAL
+Jacket: FOR_THE_FINAL_old -> Metadata Key: FOR_THE_FINAL
+Jacket: For_You -> Metadata Key: Forever_Young
+Jacket: Friends -> Metadata Key: My_Friend
+Jacket: Funky_sonic_World_(CLASSIC) -> Metadata Key: Funky_sonic_World
+Jacket: Fushigida_Nippon_old -> Metadata Key: Fushigida_Nippon
+Jacket: Futari_wa_love_love(kari)_old -> Metadata Key: Futari_wa_love_love(kari)
+Jacket: Fuujin_unryuuden_(CLASSIC) -> Metadata Key: Fuujin_unryuuden
+Jacket: Fuujin_unryuuden_old -> Metadata Key: Fuujin_unryuuden
+Jacket: Fuurin_hanabi_(unused) -> Metadata Key: Fuurin_hanabi
+Jacket: Fuu_rai -> Metadata Key: rai
+Jacket: Game_yori_ai_wo_komete_(CLASSIC) -> Metadata Key: Game_yori_ai_wo_komete
+Jacket: Geigeki_no_forte_old -> Metadata Key: Geigeki_no_forte
+Jacket: Gensou_raijinki_(CLASSIC) -> Metadata Key: Gensou_raijinki
+Jacket: GETAWAY_old -> Metadata Key: GETAWAY
+Jacket: GET_IT_ALL_old -> Metadata Key: GET_IT_ALL
+Jacket: GET_READY_old -> Metadata Key: GET_READY
+Jacket: GIANT_SLUG_old -> Metadata Key: GIANT_SLUG
+Jacket: Glass_no_kobune_old -> Metadata Key: Glass_no_kobune
+Jacket: Going_my_way!_old -> Metadata Key: Going_my_way!
+Jacket: Going_up_old -> Metadata Key: Going_up
+Jacket: Goodbye_sengen_GITADORA -> Metadata Key: Goodbye_sengen
+Jacket: Good_bye,_Summer~sayonara_wa_iwanai~_GFDM -> Metadata Key: Good_bye,_Summer~sayonara_wa_iwanai~
+Jacket: GORI_GORI_old -> Metadata Key: GORI_GORI
+Jacket: Go_my_way -> Metadata Key: Going_my_way!
+Jacket: Green_Lime_(CLASSIC) -> Metadata Key: Green_Lime
+Jacket: Green_Lime_old -> Metadata Key: Green_Lime
+Jacket: Guitar_drive_old -> Metadata Key: Guitar_drive
+Jacket: Gurenge -> Metadata Key: Surge
+Jacket: Haha_ni_dakarete_Sandogasa_Ponta -> Metadata Key: Kaze_ni_fukarete_Sandogasa_Ponta
+Jacket: Hanabi -> Metadata Key: Sanagi
+Jacket: Hanamaru_pippi_wa_yoiko_dake_old -> Metadata Key: Hanamaru_pippi_wa_yoiko_dake
+Jacket: Handsome_JET_L-Project_old -> Metadata Key: Handsome_JET_L-Project
+Jacket: Hanenaki_shoujo_uta_new -> Metadata Key: Hanenaki_shoujo_uta
+Jacket: Hanenaki_shoujo_uta_old -> Metadata Key: Hanenaki_shoujo_uta
+Jacket: HARUKAZE_(BEMANI_Sound_Team__TATSUYA_) -> Metadata Key: HARUKAZE_(BEMANI_Sound_Team_%22TATSUYA%22)
+Jacket: HEAVEN'S_COCKTAIL -> Metadata Key: HEAVEN%27S_COCKTAIL
+Jacket: HEAVEN_INSIDE_old -> Metadata Key: HEAVEN_INSIDE
+Jacket: Heaven_is_a_'57_metallic_gray -> Metadata Key: Heaven_is_a_%2757_metallic_gray
+Jacket: HELPLESS -> Metadata Key: BELLS
+Jacket: Highway_star_old -> Metadata Key: Highway_star
+Jacket: Hikooki_old -> Metadata Key: Hikooki
+Jacket: Himawari_EXCHAIN -> Metadata Key: Himawari*EXCHAIN
+Jacket: Hitoribocchi_old -> Metadata Key: Hitoribocchi
+Jacket: Hitori_asobi_old -> Metadata Key: Hitori_asobi
+Jacket: Hitoyo_no_kiseki_(Long_Version) -> Metadata Key: Hitoyo_no_kiseki
+Jacket: Homesick_Pt.2&3 -> Metadata Key: Homesick_Pt.2%263
+Jacket: Home_Girl -> Metadata Key: Sunflower_Girl
+Jacket: Honolulu_Loco_Boy_old -> Metadata Key: Honolulu_Loco_Boy
+Jacket: Hoshifuri_(CLASSIC) -> Metadata Key: Hoshifuri
+Jacket: Hoshifuri_old -> Metadata Key: Hoshifuri
+Jacket: Hoshi_no_kakera -> Metadata Key: Romantic_no_kakera
+Jacket: Hoshi_no_sumika -> Metadata Key: Hakoniwa_no_sekai
+Jacket: Hotaru_old -> Metadata Key: Hotaru
+Jacket: How_do_you_feel -> Metadata Key: How_do_you_feel%3F
+Jacket: How_do_you_feel_old -> Metadata Key: How_do_you_feel%3F
+Jacket: Humming_rabbit_old -> Metadata Key: Humming_rabbit
+Jacket: I'm_a_loser -> Metadata Key: I%27m_a_loser
+Jacket: I'M_GONNA_GET_YOU! -> Metadata Key: I%27M_GONNA_GET_YOU!
+Jacket: I'M_GONNA_GET_YOU!_old -> Metadata Key: I%27M_GONNA_GET_YOU!
+Jacket: I'm_so_Happy_(Rockin'_ver.) -> Metadata Key: I%27m_so_Happy_(Rockin%27_ver.)
+Jacket: Ichimoudajin_(CLASSIC) -> Metadata Key: Ichimoudajin
+Jacket: Icicles_GFDM -> Metadata Key: Icicles
+Jacket: Ijiwaru_na_anata_(CLASSIC) -> Metadata Key: Ijiwaru_na_anata
+Jacket: Ijiwaru_na_anata_old -> Metadata Key: Ijiwaru_na_anata
+Jacket: Illuminati_~hikari_wo_motomeru_monotachi~_(CLASSIC) -> Metadata Key: Illuminati_~hikari_wo_motomeru_monotachi~
+Jacket: INSIDE-OUT_old -> Metadata Key: INSIDE-OUT
+Jacket: Invitation -> Metadata Key: Invitation_from_ZEN
+Jacket: In_control_old -> Metadata Key: In_control
+Jacket: IN_MY_WORLD -> Metadata Key: JET_WORLD
+Jacket: Island_in_the_sun_~GFdm_Ver.~_old -> Metadata Key: Island_in_the_sun_~GFdm_Ver.~
+Jacket: I_Want_It_All_old -> Metadata Key: I_Want_It_All
+Jacket: Jake_in_the_Box_old -> Metadata Key: Jake_in_the_Box
+Jacket: Jet_coaster_girl_(CLASSIC) -> Metadata Key: Jet_coaster_girl
+Jacket: JET_WORLD_(CLASSIC) -> Metadata Key: JET_WORLD
+Jacket: Jinrui_no_shinpo_to_chouwa -> Metadata Key: Jinrui_no_shinpo_to_chouwa%3F
+Jacket: Jisei_template_XG3 -> Metadata Key: Jisei_template
+Jacket: JJ-road_old -> Metadata Key: JJ-road
+Jacket: Joker_old -> Metadata Key: Joker
+Jacket: Jounetsu_fun!_fun!_old -> Metadata Key: Jounetsu_fun!_fun!
+Jacket: Juicy_old -> Metadata Key: Juicy
+Jacket: Junbenka_old -> Metadata Key: Junbenka
+Jacket: Junbi_undou_MXM -> Metadata Key: Junbi_undou
+Jacket: Jungle_old -> Metadata Key: Jungle
+Jacket: Junsui_baiyou -> Metadata Key: Yuumei_ikyou
+Jacket: KAISER_PHOENIX_(CLASSIC) -> Metadata Key: KAISER_PHOENIX
+Jacket: Kanojo_wa_kaitou_Ranma -> Metadata Key: Kanojo_wa_kaitou_Ranma(GITADORA_ver.)
+Jacket: Karma -> Metadata Key: Kakera
+Jacket: Karma_(baked_new_jack)_old -> Metadata Key: Karma_(baked_new_jack)
+Jacket: Kashokusei_idol_shoukougun -> Metadata Key: Kashokusei:_idol_shoukougun
+Jacket: Kaze_ni_fukarete_Sandogasa_Ponta_old -> Metadata Key: Kaze_ni_fukarete_Sandogasa_Ponta
+Jacket: Keep_Ur_Dreams_old -> Metadata Key: Keep_Ur_Dreams
+Jacket: Keiko_my_love_old -> Metadata Key: Keiko_my_love
+Jacket: Kikagakuteki_Trickster -> Metadata Key: Kikagakuteki_%22Trickster%22
+Jacket: Kimagure_romantic -> Metadata Key: Shigure_insomnia
+Jacket: Kimikagesou_old -> Metadata Key: Kimikagesou
+Jacket: Kimi_no_heart_ni_dokyun -> Metadata Key: Kimi_no_tonari_ni...
+Jacket: Kimi_no_shiranai_monogatari -> Metadata Key: Kimi_mo_tenshin_ranman
+Jacket: Kimi_no_tonari_ni..._old -> Metadata Key: Kimi_no_tonari_ni...
+Jacket: Kimi_to_yajuu -> Metadata Key: Kimi_to_egaku_kiseki
+Jacket: KING_GD -> Metadata Key: KING_G
+Jacket: Kira-shakunetsu_no_sabaki-_GITADORA -> Metadata Key: Kira-shakunetsu_no_sabaki-
+Jacket: Kiseki -> Metadata Key: Kei
+Jacket: KISS_ME_GOODBYE!_old -> Metadata Key: KISS_ME_GOODBYE!
+Jacket: Knights_Assault_(MXM) -> Metadata Key: Knights_Assault
+Jacket: Kodomo_no_rakugaki_chou_(CLASSIC) -> Metadata Key: Kodomo_no_rakugaki_chou
+Jacket: Koganemisaki -> Metadata Key: Soranaki
+Jacket: Koi_old -> Metadata Key: Koi_no_melody
+Jacket: Koi_wa_okubyou_(CLASSIC) -> Metadata Key: Koi_wa_okubyou
+Jacket: Kokou_no_hana -> Metadata Key: Kyouen_no_hana
+Jacket: Konamonya_ninjouka_old -> Metadata Key: Konamonya_ninjouka
+Jacket: Kono_ko_no_nanatsu_no_oiwai_ni_old -> Metadata Key: Kono_ko_no_nanatsu_no_oiwai_ni
+Jacket: Kotatsu_to_mikan_(CLASSIC) -> Metadata Key: Kotatsu_to_mikan
+Jacket: Koukyoukyoku_dai_9_ban_dai_4_gakushou_Kanki_no_uta(GITADORA_Edition) -> Metadata Key: Koukyoukyoku_dai_9_ban_dai_4_gakushou_%22Kanki_no_uta%22(GITADORA_Edition)
+Jacket: Kunshi_ayauku_mo_chikou_yore_old -> Metadata Key: Kunshi_ayauku_mo_chikou_yore
+Jacket: Kurokami_midareshi_shura_to_narite_old -> Metadata Key: Kurokami_midareshi_shura_to_narite
+Jacket: Kuusou_rendezvous_old -> Metadata Key: Kuusou_rendezvous
+Jacket: Kyokutou_shiki_(CLASSIC) -> Metadata Key: Kyokutou_shiki
+Jacket: Kyoufu_no_unou_kaikaku_(CLASSIC) -> Metadata Key: Kyoufu_no_unou_kaikaku
+Jacket: Kyoufu_no_unou_kaikaku_old -> Metadata Key: Kyoufu_no_unou_kaikaku
+Jacket: L.A._RIDER -> Metadata Key: WILD_RIDE
+Jacket: Lachryma(Re_Queen'M)_GRV -> Metadata Key: Lachryma(Re:Queen%27M)_(GITADORA_Edition)
+Jacket: Last_Concerto_EXH -> Metadata Key: Last_Concerto
+Jacket: Last_Goodbye_-_Kore_de_honto_ni_sayonara -> Metadata Key: _Kore_de_honto_ni_sayonara
+Jacket: LAST_SCENE_old -> Metadata Key: LAST_SCENE
+Jacket: LAST_TRAIN -> Metadata Key: STOP_THIS_TRAIN
+Jacket: Lawes's_Parotia -> Metadata Key: Lawes%27s_Parotia
+Jacket: LA_ARENA_ROJA_old -> Metadata Key: LA_ARENA_ROJA
+Jacket: La_fame_di_Adria_GITADOROCK -> Metadata Key: La_fame_di_Adria
+Jacket: LEMON_&_SALT -> Metadata Key: LEMON_%26_SALT
+Jacket: LEMON_&_SALT_old -> Metadata Key: LEMON_%26_SALT
+Jacket: Let's_Dance_(colored_strings) -> Metadata Key: Let%27s_Dance_(colored_strings)
+Jacket: LET_ME_BELIEVE_old -> Metadata Key: LET_ME_BELIEVE
+Jacket: Let_Me_Go_old -> Metadata Key: Let_Me_Go
+Jacket: Liar -> Metadata Key: Libra
+Jacket: Libra_old -> Metadata Key: Libra
+Jacket: Life_is_beautiful_(unused) -> Metadata Key: Life_is_beautiful
+Jacket: Light -> Metadata Key: Twilight
+Jacket: Like&Love -> Metadata Key: Like%26Love
+Jacket: Limitless_Possibility_(CLASSIC) -> Metadata Key: Limitless_Possibility
+Jacket: Limitless_Possibility_old -> Metadata Key: Limitless_Possibility
+Jacket: Little_prayer -> Metadata Key: Little_Prayer
+Jacket: Little_Prayer_(CLASSIC) -> Metadata Key: Little_Prayer
+Jacket: Little_Prayer_old -> Metadata Key: Little_Prayer
+Jacket: Looks_old -> Metadata Key: Looks
+Jacket: Lost_in_Blue -> Metadata Key: Concertino_in_Blue
+Jacket: LOUD!_old -> Metadata Key: LOUD!
+Jacket: Lover's_High -> Metadata Key: Lover%27s_High
+Jacket: Lover's_High_old -> Metadata Key: Lover%27s_High
+Jacket: Love_Carnival_old -> Metadata Key: Love_Carnival
+Jacket: LUCKY_STAFF -> Metadata Key: LUCKY%3F_STAFF
+Jacket: MAGICAL_JET_TOUR_(Long_Version) -> Metadata Key: MAGICAL_JET_TOUR
+Jacket: Magic_words -> Metadata Key: Magic_words_%3F
+Jacket: Magic_words_old -> Metadata Key: Magic_words_%3F
+Jacket: Mahou_no_kotoba -> Metadata Key: Mahou_no_tarte
+Jacket: Mahou_no_kotoba_old -> Metadata Key: Mahou_no_tarte
+Jacket: Mahou_no_tarte_old -> Metadata Key: Mahou_no_tarte
+Jacket: Manatsu_no_koi_wa_chura_chura_Love_old -> Metadata Key: Manatsu_no_koi_wa_chura_chura_Love
+Jacket: Mangekyou_(CLASSIC) -> Metadata Key: Mangekyou
+Jacket: Mangekyou_old -> Metadata Key: Mangekyou
+Jacket: Mannequin_old -> Metadata Key: Mannequin
+Jacket: Marigold_old -> Metadata Key: Marigold
+Jacket: MASCARADA_old -> Metadata Key: MASCARADA
+Jacket: Matenrou_no_tokuiten~Anti_HERO -> Metadata Key: Matenrou_no_tokuiten~Anti;HERO
+Jacket: MAX!_Otomegokoro -> Metadata Key: Okomegokoro
+Jacket: MEGALOVANIA_GD -> Metadata Key: MEGALOVANIA
+Jacket: Megitsune -> Metadata Key: Setsuna
+Jacket: Mei -> Metadata Key: Kei
+Jacket: Meikyoushisui_(CLASSIC) -> Metadata Key: Meikyoushisui
+Jacket: Memories -> Metadata Key: Memories_(TAKA)
+Jacket: Meta-meta_Himawari_Punch -> Metadata Key: Meta-meta%3F_Himawari_Punch
+Jacket: Meta-meta_Himawari_Punch_-demo_tape_Ver.- -> Metadata Key: Meta-meta%3F_Himawari_Punch_-demo_tape_Ver.-
+Jacket: MIDNIGHT_SPECIAL_old -> Metadata Key: MIDNIGHT_SPECIAL
+Jacket: MIDNIGHT_SUN_(Long_Version) -> Metadata Key: MIDNIGHT_SUN
+Jacket: Mikazuki_connect -> Metadata Key: Mikazuki:connect
+Jacket: Mikeneko_JIVE&Jive -> Metadata Key: Mikeneko_JIVE%26Jive
+Jacket: Mikeneko_rock'n'roll -> Metadata Key: Mikeneko_rock%27n%27roll
+Jacket: Mikeneko_rock_(CLASSIC) -> Metadata Key: Mikeneko_rock
+Jacket: Minamikaze -> Metadata Key: Mind_game
+Jacket: Minamo_shizuka_ni_daichi_no_retsujiru_watarasete_-Remaster- -> Metadata Key: Minamo_shizuka_ni_daichi_no_retsujiru_watarasete
+Jacket: Mint_candy_citrus_drop_old -> Metadata Key: Mint_candy_citrus_drop
+Jacket: Miracle_sweet_sweets_magic -> Metadata Key: Miracle_sweet_sweets_magic!!
+Jacket: Mirage_residence_(CLASSIC) -> Metadata Key: Mirage_residence
+Jacket: MISS_YOU_old -> Metadata Key: MISS_YOU
+Jacket: Mister_magic_old -> Metadata Key: Mister_magic
+Jacket: Mobius_(BEMANI_Sound_Team_Yoshihiko_Koezuka) -> Metadata Key: Mobius_(BEMANI_Sound_Team_%22Yoshihiko_Koezuka%22)
+Jacket: MODEL_DD2_old -> Metadata Key: MODEL_DD2
+Jacket: MODEL_DD3_old -> Metadata Key: MODEL_DD3
+Jacket: MODEL_DD4_(CLASSIC) -> Metadata Key: MODEL_DD4
+Jacket: MODEL_DD5_old -> Metadata Key: MODEL_DD5
+Jacket: MODEL_DD6_(CLASSIC) -> Metadata Key: MODEL_DD6
+Jacket: MODEL_DD7_old -> Metadata Key: MODEL_DD7
+Jacket: MODEL_DD8_(CLASSIC) -> Metadata Key: MODEL_DD8
+Jacket: MODEL_DD8_old -> Metadata Key: MODEL_DD8
+Jacket: MODEL_DD9_(CLASSIC) -> Metadata Key: MODEL_DD9
+Jacket: MODEL_FT2_Miracle_Version_(CLASSIC) -> Metadata Key: MODEL_FT2_Miracle_Version
+Jacket: MODEL_FT2_Miracle_Version_old -> Metadata Key: MODEL_FT2_Miracle_Version
+Jacket: MODEL_FT2_old -> Metadata Key: MODEL_FT2
+Jacket: MODEL_FT4_alt -> Metadata Key: MODEL_FT4
+Jacket: Modoranai_koi_old -> Metadata Key: Modoranai_koi
+Jacket: Moonlight_Walkin' -> Metadata Key: Moonlight_Walkin%27
+Jacket: Moonlight_Walkin'_old -> Metadata Key: Moonlight_Walkin%27
+Jacket: Moratorium_old -> Metadata Key: Moratorium
+Jacket: Mousou_gakuen_ino-koi_gumi_old -> Metadata Key: Mousou_gakuen_ino-koi_gumi
+Jacket: MU-DAI_old -> Metadata Key: MU-DAI
+Jacket: Mugon_no_machi_old -> Metadata Key: Mugon_no_machi
+Jacket: Mujou_no_hoshi_old -> Metadata Key: Mujou_no_hoshi
+Jacket: Munagoto_no_umi_old -> Metadata Key: Munagoto_no_umi
+Jacket: Murmur_twins_(guitar_pop_ver.) -> Metadata Key: Murmur_twins(guitar_pop_ver.)
+Jacket: Mushroom_boy_old -> Metadata Key: Mushroom_boy
+Jacket: My_Favorite_Things_old -> Metadata Key: My_Favorite_Things
+Jacket: My_Friend_old -> Metadata Key: My_Friend
+Jacket: My_Way_My_Life -> Metadata Key: My_Way,_My_Life
+Jacket: Neko_neko -> Metadata Key: Neko*neko
+Jacket: NEX+AGE -> Metadata Key: NEX%2BAGE
+Jacket: Next_Step_old -> Metadata Key: Next_Step
+Jacket: Niji_no_kanata -> Metadata Key: Nijiiro_no_hana
+Jacket: Ninkimono_nandesu_old -> Metadata Key: Ninkimono_nandesu
+Jacket: No_Hesitation -> Metadata Key: Nonstop_elation
+Jacket: NO_MORE_CRYING_old -> Metadata Key: NO_MORE_CRYING
+Jacket: No_way_... -> Metadata Key: No_way...
+Jacket: Nyanderful_55_old -> Metadata Key: Nyanderful_55
+Jacket: Oasis -> Metadata Key: Cassis
+Jacket: Oboro_GITADOROCK -> Metadata Key: Heron_-GITADOROCK_ver.-
+Jacket: Onion_man -> Metadata Key: Onion_Ninja
+Jacket: ON_OUR_WAY -> Metadata Key: TAKE_YOU_AWAY
+Jacket: Opus_Life_old -> Metadata Key: Opus_Life
+Jacket: Ouroboros -> Metadata Key: Oboro
+Jacket: OVERHEAT -> Metadata Key: OVERHEAT_-Type_GD-
+Jacket: Over_there_(CLASSIC) -> Metadata Key: Over_there
+Jacket: Over_there_old -> Metadata Key: Over_there
+Jacket: OVER_THE_LIMIT!_old -> Metadata Key: OVER_THE_LIMIT!
+Jacket: Panda_shinken_1,2,3_~chie!_Ossho-san_ni_wa_kanawanaiya!~_BEAST -> Metadata Key: Panda_shinken_1,2,3_~chie!_Ossho-san_ni_wa_kanawanaiya!~
+Jacket: Paradigm_Shift_MXM -> Metadata Key: Paradigm_Shift
+Jacket: Passion_old -> Metadata Key: Passion
+Jacket: Peace_sign -> Metadata Key: Siren_sign
+Jacket: Peppermint_wa_watashi_no_teki_old -> Metadata Key: Peppermint_wa_watashi_no_teki
+Jacket: Piranha_old -> Metadata Key: Piranha
+Jacket: Plastic_imitations_(CLASSIC) -> Metadata Key: Plastic_imitations
+Jacket: Plastic_Umbrella_old -> Metadata Key: Plastic_Umbrella
+Jacket: Pop_music_zokuron_XG3 -> Metadata Key: Pop_music_zokuron
+Jacket: Pot-pourri_d'marmalade -> Metadata Key: Pot-pourri_d%27marmalade
+Jacket: Pot-pourri_d'marmalade_old -> Metadata Key: Pot-pourri_d%27marmalade
+Jacket: Power_Game_old -> Metadata Key: Power_Game
+Jacket: Precious_heart -> Metadata Key: Fire_in_my_heart
+Jacket: Predator's_Crypto_Pt.1 -> Metadata Key: Predator%27s_Crypto_Pt.1
+Jacket: Predator's_Crypto_Pt.2 -> Metadata Key: Predator%27s_Crypto_Pt.2
+Jacket: Prey_GITADORA_(unused) -> Metadata Key: Nature(GITADORA_ver.)
+Jacket: PRIME_LIGHT_(CLASSIC) -> Metadata Key: PRIME_LIGHT
+Jacket: Prism_old -> Metadata Key: Prism
+Jacket: Purple_storm_(CLASSIC) -> Metadata Key: Purple_storm
+Jacket: Purple_storm_old -> Metadata Key: Purple_storm
+Jacket: Quaver_Gitadora_ver._XG3 -> Metadata Key: Quaver_Gitadora_ver.
+Jacket: R.p.m.RED_old -> Metadata Key: R.p.m.RED
+Jacket: Rabbical_trap -> Metadata Key: Rabbical:trap
+Jacket: Raining_Sunshine_old -> Metadata Key: Raining_Sunshine
+Jacket: Raison_d'etre,_zensen_yori -> Metadata Key: Raison_d%27etre,_zensen_yori
+Jacket: Rakuen_no_tenshi_old -> Metadata Key: Rakuen_no_tenshi
+Jacket: Ranzen_no_maihime -> Metadata Key: Danzai_no_mimesis
+Jacket: Reaching_for_the_Stars_(CLASSIC) -> Metadata Key: Reaching_for_the_Stars
+Jacket: Real_~L_size_no_yume~_old -> Metadata Key: Real_~L_size_no_yume~
+Jacket: Rebirth_of_love_old -> Metadata Key: Rebirth_of_love
+Jacket: Rebirth_old -> Metadata Key: Rebirth
+Jacket: Red_old -> Metadata Key: Red
+Jacket: ReGENERATION -> Metadata Key: Re:GENERATION
+Jacket: Remember_remember_ReGLOSS -> Metadata Key: Remember_remember_(GITADORA_ver.)
+Jacket: Rewrite -> Metadata Key: RePrise
+Jacket: Riff_Riff_Orbit_old -> Metadata Key: Riff_Riff_Orbit
+Jacket: Riff_Riff_Paradise_old -> Metadata Key: Riff_Riff_Paradise
+Jacket: RIGHT_ON_TIME_(CLASSIC) -> Metadata Key: RIGHT_ON_TIME
+Jacket: Ring_old -> Metadata Key: Ring
+Jacket: Rin_to_shite_saku_hana_no_gotoku_(CLASSIC) -> Metadata Key: Rin_to_shite_saku_hana_no_gotoku
+Jacket: Rin_to_shite_saku_hana_no_gotoku_old -> Metadata Key: Rin_to_shite_saku_hana_no_gotoku
+Jacket: RISE_old -> Metadata Key: RISE_UP
+Jacket: Road_of_Resistance -> Metadata Key: Resistance
+Jacket: ROCKIN'_PARADISE -> Metadata Key: ROCKIN%27_PARADISE
+Jacket: Rock_Star -> Metadata Key: Roar
+Jacket: Rock_to_Infinity_(CLASSIC) -> Metadata Key: Rock_to_Infinity
+Jacket: Rock_to_Infinity_old -> Metadata Key: Rock_to_Infinity
+Jacket: Roki -> Metadata Key: Rejoin
+Jacket: Romance -> Metadata Key: Chance
+Jacket: ROOPA_old -> Metadata Key: ROOPA
+Jacket: Ru-Ru-Ru_old -> Metadata Key: Ru-Ru-Ru
+Jacket: Ruijou_no_karma_unused -> Metadata Key: Ruijou_no_karma
+Jacket: RUINA(GITADORA_EDITION) -> Metadata Key: RUINA_(GITADORA_EDITION)
+Jacket: Ryouran_hit_chart_(CLASSIC) -> Metadata Key: Ryouran_hit_chart
+Jacket: Ryukyu_rendezvous -> Metadata Key: Kuusou_rendezvous
+Jacket: S.P.I.P._(CLASSIC) -> Metadata Key: S.P.I.P.
+Jacket: S.P.I.P._old -> Metadata Key: S.P.I.P.
+Jacket: Saisoku_touhikou_old -> Metadata Key: Saisoku_touhikou
+Jacket: Samurai!!_old -> Metadata Key: Samurai!!
+Jacket: Sanagi_sai_GFDM -> Metadata Key: Sanagi_sai
+Jacket: Sandogasa_Ponta_wa_kyou_mo_iku_old -> Metadata Key: Sandogasa_Ponta_wa_kyou_mo_iku
+Jacket: Sasurai -> Metadata Key: Samurai!!
+Jacket: Save_A_Little_Something_old -> Metadata Key: Save_A_Little_Something
+Jacket: Sayonara_dayori_old -> Metadata Key: Sayonara_dayori
+Jacket: Say_old -> Metadata Key: Solid
+Jacket: Schrodinger_no_neko -> Metadata Key: Schrodinger_no_neko_(GITADORA_Edition)
+Jacket: SEA_ANEMONES_old -> Metadata Key: SEA_ANEMONES
+Jacket: Seiza_ga_koishita_shunkan_wo._(unused) -> Metadata Key: Seiza_ga_koishita_shunkan_wo.
+Jacket: Senbonzakura_GD -> Metadata Key: Senbonzakura
+Jacket: Shake_and_Shout!!_(CLASSIC) -> Metadata Key: Shake_and_Shout!!
+Jacket: She's_the_Bug -> Metadata Key: She%27s_the_Bug
+Jacket: She's_the_Bug_old -> Metadata Key: She%27s_the_Bug
+Jacket: Shichifukujin_old -> Metadata Key: Shichifukujin
+Jacket: Shikarare_biyori_old -> Metadata Key: Shikarare_biyori
+Jacket: ShinchoushinTION_old -> Metadata Key: ShinchoushinTION
+Jacket: Shining(GF&dm_style) -> Metadata Key: Shining(GF%26dm_style)
+Jacket: Shinjitsu_~GFDM_Ver.~ -> Metadata Key: Island_in_the_sun_~GFdm_Ver.~
+Jacket: Shinsoukyoku_lightning -> Metadata Key: Shinsoukyoku:lightning
+Jacket: SHINY_DAYS -> Metadata Key: RAINY_DAYS
+Jacket: Shootin'_star -> Metadata Key: Shootin%27_star
+Jacket: Shooting_Star_(ReGLOSS) -> Metadata Key: Shooting_Star_(GITADORA_ver.)
+Jacket: Shower_of_Love_old -> Metadata Key: Shower_of_Love
+Jacket: Show_Business -> Metadata Key: Pigeon_Business
+Jacket: Show_Business_old -> Metadata Key: Pigeon_Business
+Jacket: Shunrai -> Metadata Key: Samurai!!
+Jacket: Silhouette -> Metadata Key: Croquette
+Jacket: SILLY_GIRL_old -> Metadata Key: SILLY_GIRL
+Jacket: Siren -> Metadata Key: Seiron
+Jacket: Siren_old -> Metadata Key: Siren_sign
+Jacket: Sky_old -> Metadata Key: Solid
+Jacket: Sky_Runner_old -> Metadata Key: Sky_Runner
+Jacket: Slang_old -> Metadata Key: Slang
+Jacket: SMILE_FOR_YOU_old -> Metadata Key: SMILE_FOR_YOU
+Jacket: SOME_HARD_REACTIONS_old -> Metadata Key: SOME_HARD_REACTIONS
+Jacket: Sorairo_days_GFDM -> Metadata Key: Sorairo_days
+Jacket: Souhaku_old -> Metadata Key: Souhaku
+Jacket: Sousei_no_Aquarion_GFDM -> Metadata Key: Sousei_no_Aquarion
+Jacket: SPACE_DRIVER_XG3 -> Metadata Key: SPACE_DRIVER
+Jacket: Sparkle_Smilin'_-GITADORA_EDITION- -> Metadata Key: Sparkle_Smilin%27_-GITADORA_EDITION-
+Jacket: Spellbound_old -> Metadata Key: Spellbound
+Jacket: Spiral_Wind_old -> Metadata Key: Spiral_Wind
+Jacket: Start_it_right_away -> Metadata Key: Dance_the_night_away
+Jacket: Star_no_koibito_old -> Metadata Key: Star_no_koibito
+Jacket: Street_Runner_old -> Metadata Key: Street_Runner
+Jacket: Sugar_song_to_bitter_step_cover -> Metadata Key: Sugar_song_to_bitter_step
+Jacket: Summer_'64 -> Metadata Key: Summer_%2764
+Jacket: SUMMER_SUN -> Metadata Key: UNDER_THE_SUN
+Jacket: Sunahama -> Metadata Key: Anathema
+Jacket: Sunday_driver -> Metadata Key: Sky_diver
+Jacket: Sunflower_Girl_old -> Metadata Key: Sunflower_Girl
+Jacket: SUNRISE_STREET -> Metadata Key: MONSTER_TREE
+Jacket: SUPER_HEROINE!!_MXM -> Metadata Key: SUPER_HEROINE!!
+Jacket: SUPER_SUMMER_SALE_(unused) -> Metadata Key: SUPER_SUMMER_SALE
+Jacket: Sutekina_ameagari_old -> Metadata Key: Sutekina_ameagari
+Jacket: SUZY_AND_THE_TIME_MACHINE_old -> Metadata Key: SUZY_AND_THE_TIME_MACHINE
+Jacket: Sweet_feelin' -> Metadata Key: Sweet_feelin%27
+Jacket: SWEET_FELINE_old -> Metadata Key: SWEET_FELINE
+Jacket: Sweet_Illusion_old -> Metadata Key: Sweet_Illusion
+Jacket: Swimmers_old -> Metadata Key: Swimmers
+Jacket: Swimming_In_Love_old -> Metadata Key: Swimming_In_Love
+Jacket: Tail_Spin_old -> Metadata Key: Tail_Spin
+Jacket: Taiyou_no_hana_old -> Metadata Key: Taiyou_no_hana
+Jacket: Take_My_Hand_old -> Metadata Key: Take_My_Hand
+Jacket: Talatta_dance_old -> Metadata Key: Talatta_dance
+Jacket: Tamashii_no_refrain -> Metadata Key: Nakimushi_no_gaisen
+Jacket: Tanbo_no_ta_(CLASSIC) -> Metadata Key: Tanbo_no_ta
+Jacket: Tears_of_happiness_old -> Metadata Key: Tears_of_happiness
+Jacket: Tengoku_music -> Metadata Key: Rengoku_jihen
+Jacket: TENGU_old -> Metadata Key: TENGU
+Jacket: Tentaikansoku -> Metadata Key: Gaika_no_sou
+Jacket: Tentaikansoku_old -> Metadata Key: Renaikansoku_-Rock_Band_Ver.-
+Jacket: Termination -> Metadata Key: Dedication
+Jacket: Terpsichore_old -> Metadata Key: Terpsichore
+Jacket: The_Ascension_old -> Metadata Key: The_Ascension
+Jacket: The_Least_100sec_(CLASSIC) -> Metadata Key: The_Least_100sec
+Jacket: The_Legend_old -> Metadata Key: The_Legend
+Jacket: The_Messenger_(not_decorated)_old -> Metadata Key: The_Messenger_(not_decorated)
+Jacket: The_sun_shines_through_rain_old -> Metadata Key: The_sun_shines_through_rain
+Jacket: The_WORLD -> Metadata Key: JET_WORLD
+Jacket: THREE_WORMS_(CLASSIC) -> Metadata Key: THREE_WORMS
+Jacket: THREE_WORMS_old -> Metadata Key: THREE_WORMS
+Jacket: TIERRA_BUENA_old -> Metadata Key: TIERRA_BUENA
+Jacket: Timepiece_phase_II_(CLASSIC) -> Metadata Key: Timepiece_phase_II
+Jacket: Tizona_d'El_Cid -> Metadata Key: Tizona_d%27El_Cid
+Jacket: Toki_no_youka -> Metadata Key: Tenkuu_no_oukaku
+Jacket: Tottemo_tottemo,_arigatou -> Metadata Key: Tottemo_tottemo,_arigatou.
+Jacket: Touch_Me_GekiReco_&_Sota_F -> Metadata Key: Touch_Me_(BEMANI_Sound_Team_%22GekiReco_%26_Sota_F.%22)
+Jacket: True_Love_and_Valentines_old -> Metadata Key: True_Love_and_Valentines
+Jacket: Tsubasa -> Metadata Key: Tsukigasa
+Jacket: Twinkle_Star_old -> Metadata Key: Twinkle_Star
+Jacket: U.N._Owen_wa_kanojona_no_ka_(Kisida_Kyoudan_&_THE_Akeboshi_Rockets) -> Metadata Key: U.N._Owen_wa_kanojona_no_ka%3F_(Kisida_Kyoudan_%26_THE_Akeboshi_Rockets)
+Jacket: Umi_no_koe -> Metadata Key: Taiyo_no_ko
+Jacket: Under_The_Nest_-Remaster- -> Metadata Key: Under_The_Nest
+Jacket: Utopia_old -> Metadata Key: Utopia
+Jacket: V.I.P -> Metadata Key: S.P.I.P.
+Jacket: Vampire_Killer_(CLASSIC) -> Metadata Key: Vampire_Killer
+Jacket: Vampire_Killer_old -> Metadata Key: Vampire_Killer
+Jacket: VANESSA_-tenseihen-_(CLASSIC) -> Metadata Key: VANESSA_-tenseihen-
+Jacket: VANESSA_-tenseihen-_old -> Metadata Key: VANESSA_-tenseihen-
+Jacket: Venus_old -> Metadata Key: Venus
+Jacket: Vertigo_old -> Metadata Key: Vertigo
+Jacket: Victory!_(CLASSIC) -> Metadata Key: Victory!
+Jacket: VOIDDD_old -> Metadata Key: VOIDDD
+Jacket: Wakamono_no_subete -> Metadata Key: Hakoniwa_no_etude
+Jacket: WAKE_ME_UP! -> Metadata Key: FAKE_TIME
+Jacket: Walk_with_you_(CLASSIC) -> Metadata Key: Walk_with_you
+Jacket: Walk_with_you_old -> Metadata Key: Walk_with_you
+Jacket: Wall_Street_down-sizer_old -> Metadata Key: Wall_Street_down-sizer
+Jacket: Walnuts_old -> Metadata Key: Walnuts
+Jacket: Wana -> Metadata Key: Sanagi
+Jacket: Wasuremono_old -> Metadata Key: Wasuremono
+Jacket: Water_frame_old -> Metadata Key: Water_frame
+Jacket: We're_gamers -> Metadata Key: We%27re_gamers
+Jacket: What's_up -> Metadata Key: What%27s_up%3F
+Jacket: White_Sketchbook_old -> Metadata Key: White_Sketchbook
+Jacket: White_tornado_(CLASSIC) -> Metadata Key: White_tornado
+Jacket: White_wings_old -> Metadata Key: White_wings
+Jacket: WILD_CREATURES -> Metadata Key: WILD_RIDE
+Jacket: WILD_RIDE_(CLASSIC) -> Metadata Key: WILD_RIDE
+Jacket: Wonderful_Workers_old -> Metadata Key: Wonderful_Workers
+Jacket: YARA_TUM_KAHAN -> Metadata Key: YARA_TUM_KAHAN%3F
+Jacket: Yellow_Panic_Time_(CLASSIC) -> Metadata Key: Yellow_Panic_Time
+Jacket: Yoru_ni_kakeru -> Metadata Key: Sora_ni_fureru
+Jacket: You'll_be_a_man -> Metadata Key: You%27ll_be_a_man
+Jacket: You'll_be_a_man_old -> Metadata Key: You%27ll_be_a_man
+Jacket: You've_Got_2_Get_Me -> Metadata Key: You%27ve_Got_2_Get_Me
+Jacket: You've_Got_2_Get_Me_old -> Metadata Key: You%27ve_Got_2_Get_Me
+Jacket: You_can't_do_it_if_you_try -> Metadata Key: You_can%27t_do_it_if_you_try
+Jacket: Yume_de_sayonara -> Metadata Key: _Kore_de_honto_ni_sayonara
+Jacket: Zankoku_na_tenshi_no_these_GITADORA -> Metadata Key: Zankoku_na_tenshi_no_these
+Jacket: ZENITH_old -> Metadata Key: ZENITH
+Jacket: Zenryoku_batankyuu -> Metadata Key: Genroku_hanafubuki
+Jacket: Zero_to_ichi_no_kagi_no_uta_nostalgia -> Metadata Key: Zero_to_ichi_no_kagi_no_uta
+
+--- Still Missing ---
+1-2-3_(After_the_Rain(soraru_x_mafumafu))
+101kaime_no_noroi
+1n_old
+20th_Century_Boy
+5-10_unused
+777_GFDM
+A.DOGMA_(CLASSIC)
+AFANTASIA
+After_dark_old
+AHD
+Ai_no_shirushi
+Akikaze
+Akogare
+All_I_Want
+ALMOST_EASY
+Ano_hi_no_kaze
+Anti_Pleasure_~kairaku_shugisha_no_yuuutsu~
+Any_Percent
+Arcadia_GD
+Arche_(CLASSIC)
+Ashitairo_world_end
+AXIS_(CLASSIC)
+Ayumi
+A_Blast_Beat
+A_view
+BAD_MUSIC_FREAKS
+Bayside_baby
+Bereavement
+Be_Proud
+Blood_And_Thunder
+BLUE_FLAME
+Boku_ga_kowareru_mae_ni
+Born_to_be_NEW_WORLD
+Cagayake!GIRLS
+Canary_GFdm-MIX
+Catal_rhythm
+CENTAUR
+CHANCE!
+Chronos_(CLASSIC)
+Clattanoia
+Cockpit_(CLASSIC)
+Confession_(CLASSIC)
+CQCQ
+CRAWL
+CROSSOVER
+CROSS_ROAD
+CRYSTAL_BREATH
+Daisuki_da_yo
+DANCE_FOR_THE_FUTURE
+DAWN
+Day's!_old
+DESTINY_GFDM
+DON'T_HIDE_YOUR_MIND
+DON'T_STOP_BELIEVING
+Doro_no_bunzai_de_watashi_dake_no_taisetsu_wo_ubaouda_nante
+DRY_MARTINI
+Dye_it_white
+Dynamis_(CLASSIC)
+Endless_Waltz
+ENDYMION
+Enrai~tooku_ni_aru_akari~
+ERASER_ENGINE
+Escape_(Hemenway)
+Fantasista_unused
+Fashion_monster
+FIRE_(Long_Version)
+Flying_get
+Fly_far_bounce_(GITADOROCK_by_Mutsuhiko_Izumi)
+FLY_HIGH
+For_UltraPlayers_EXH
+FREEDOM
+GET_GOING
+Get_Off_of_My_Way
+Gimme_chocolate!!
+GLAMOROUS_SKY
+GLAMOROUS_SKY_old
+GO!_GO!_MANIAC
+GO-ON
+God_knows...
+GOLD_GFDM
+Growing_growing
+Guuzen_toiu_na_no_hitsuzen
+Hakujitsu
+Hana_tsuki_kiseki
+HELLO_YOU
+HELPLESS_(Long_Version)
+HIGH
+Hitorigoto_mitai_ni_aishiteta
+Hocus_Pocus
+Holding_On
+Home_Girl_old
+Honjitsu_wa_seiten_nari
+HOTEL_alien
+Ichigo
+Idle_Gossip
+IMPLANTATION
+Impulse_of_Blue
+IN_YOUR_EYES
+Japanese_rock_fighter
+Jet_ninjin_GD
+JET_WORLD_(Long_Version)
+Jungle_(CLASSIC)
+Just_In_My_Heart
+Kaidokufunou
+Kanzen_na_inochi
+Karma_(BUMP_OF_CHICKEN)
+Karma_(BUMP_OF_CHICKEN)_old
+Kimagure_romantic_old
+Kimi_machi_sky
+Kimi_wo_mamotte_Kimi_wo_aishite
+KING_G_(2017Mix)
+Kiseki_old
+Kokoro_no_oreta_angel
+Leaving_All_Behind
+Less_old_jacket
+Little_Little_Princess
+LOLITA_LET'S(ra)GO!GO!!GO!!!
+Long_Live_Rock'N'Roll
+LOOKIN'_FOR_LOVE_IN_YOU
+Looks_(CLASSIC)
+Loretta
+LOVE_&_JOY_-GITADORA_MIX-
+Luvly,_Merry-Go-Round
+M1917
+Maboroshi_wink
+MAD_BLAST_~DRASTIC_AGGRESSION_STYLE~
+MARTIAL_ARTS
+Maware!_Setsugetsuka
+Maximum_the_hormone
+Mayday
+Mazeruna_kiken
+Memeshikute
+Memories_GFDM_old
+Metal_Queen
+MIDNIGHT_SUN_(Long_Version)_old
+MIND_YOUR_STEP!_GD
+MIND_YOUR_STEP!_old
+Misirlou
+Mixed_nuts
+Mona_Lisa
+Mouretsu_uchuu_koukyoukyoku_dai_nana_gakusho_Mugen_no_ai
+Mou_aomukede_iku_shikanai_GITADORA_MIX_DE_IKU_SHIKA_NAI_Edition
+MOVE_OVER
+MR.MACHINE
+Mr._Darling
+MUPPET
+My_HERO_(04_Limited_Sazabys)
+My_SunShine_GFDM
+N.G.S
+NA-NA-NA
+Nagisa_no_GO-GO_GIRL!!
+Natsumatsuri
+NEMESIS_(ARCH_ENEMY)
+NEVER_AGAIN
+NEWSPAPER(Vocal_ver.)
+Nexus_(a_crowd_of_rebellion)
+Ningen_shinkaron
+NOCTURNE_No.9
+Not_So_Bad
+NOVA_ERA
+NOW_I'M_SURE
+No_pain,_No_game
+Odio_Odio_Odio_Sorry_C
+Okuru_kotoba
+Onihime_(CLASSIC)
+ONLY_CHANGING
+Only_my_railgun_(Captain_Punk)
+On_Cloud_Nine
+ORANGE_JET_STREAM
+Out_of_breath
+O_JIYA_(CLASSIC)
+P.P.R._(CLASSIC)
+P.P.R._(Long_Version)
+Panasonic_Youth
+PARANOID
+Peace_sign_old
+PIPELINE
+Pirates_of_Upas
+Ponytail_to_shushu
+Pretender
+Prey_GITADORA
+PRIMAL_SOUL_(Long_Version)
+Puzzle
+RAISE_MY_SWORD
+RALLY_GD
+RALLY_old
+RB_smooooch
+Reality_Lost
+Real_world
+Rejoin_(unused)
+Rewrite_old
+Ring_(CLASSIC)
+Road_for_thunder
+ROCKET_DIVE_GD
+Rock_And_Roll_All_Nite
+ROLLING1000tOON
+RUINA
+Runway_beat
+RUSSIAN_ROULETTE
+Ryuu_ginzureba_kumo_okori_tora_usobukeba_kaze_shouzu_feat._Nana_Takahashi_709sec
+S.F.M
+S.T.A.R.S
+Sanagi_(CLASSIC)
+Saredo_kijutsushi_wa_sai_wo_furu
+SAVIOR_OF_SONG
+Seiron_(CLASSIC)
+Senkou_no_PRISONER
+SEPTEMBER
+SEVENTH_HEAVEN_album
+Shanghai_honey
+Shangri-La
+Shinjitsu_to_tousou_TRUTH_AND_STRUGGLE
+Shunteki_aika(JET_LOVE)
+Skyscraper
+Smintheus
+Snowmelt
+Sobakasu_GD
+Sonne_(CLASSIC)
+Souhaku_(CLASSIC)
+Souzou_dakede_subarashiinda
+Stairway_Generation
+STAND_PROUD
+Starlike_stereo
+STAY_GFDM
+STAY_TUNE
+STILL_OF_THE_NIGHT
+Suishou_~hitomi_no_naka_no_mirai~
+Suki_suki_seijin
+Symbiosis
+Tally-ho
+TEAR_OFF_YOUR_CHAIN
+Teiketsu_bolt
+TENGU_(CLASSIC)
+Tentaikansoku_CLASSIC
+THE_ADVENTURES
+The_Sound_of_Truth
+Through_the_Fire_and_Flames
+TOCCATA
+Tomorrow
+Tomoyo
+Trickster_GFDM
+Trickster_old
+Tsubomi
+Tsugumi
+Tsuyoku_tsuyoku
+Tsuyoku_tsuyoku_old
+Two_Hurt
+Ukifune
+Ultimate_power
+USED_CARS
+USED_TO_ROCK'N_ROLL
+Uso
+Vertigo_(CLASSIC)
+VISION_(FREDERIC)
+VISTA
+ViViD
+VOLAQUAS
+WANNA_BE_YOUR_BOY
+Waru_agaki
+Waza
+When_I_come_back
+WILD_CHALLENGER
+WILL
+WISH
+XENOViA
+Yakenogahara_GD
+Yakenogahara_old
+Yasashisa_no_riyuu
+Youkoso_Japari_Park_e
+YOU_CAN'T_DO_IT
+You_~Meaning_All_Orbit~
+Zetsubou_Billy
+ZIGZAG_COWBOY
+ZONE_ALONE

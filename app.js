@@ -24,6 +24,7 @@ const BASE_CENTROIDS = [
 // Global State
 let jacketNames = [];
 let jacketUrlMap = {};
+let songMetadata = {};
 let databaseLoaded = false;
 let spriteCanvas = null; // Holds the 2560x8280 sprite
 let maskConfigs = {}; // Stores configuration and pre-normalized DB per mask
@@ -117,7 +118,7 @@ function estimateAffine(srcPts, dstPts, srcAreas = null, dstAreas = null) {
         let scale = 1;
         if (srcAreas && dstAreas && srcAreas[0] > 0) {
             scale = Math.sqrt(dstAreas[0] / srcAreas[0]);
-            scale = Math.max(0.5, Math.min(scale, 2.0)); // Constrain scale
+            scale = Math.max(0.75, Math.min(scale, 1.5)); // Constrain scale to 75%-150%
         }
         const cx_t = srcPts[0].x;
         const cy_t = srcPts[0].y;
@@ -264,6 +265,12 @@ async function initDatabase() {
             }
         }
         
+        loadingText.textContent = "Fetching metadata...";
+        const metaRes = await fetch("song_metadata.json");
+        if (metaRes.ok) {
+            songMetadata = await metaRes.json();
+        }
+        
         loadingText.textContent = "Downloading sprite sheet (~3.5 MB)...";
         const spriteImg = new Image();
         spriteImg.src = "jackets_sprite.webp";
@@ -397,7 +404,7 @@ async function prepareMaskConfigs(sCtx) {
         }
         const erodedBitmap = await createImageBitmap(erodedImgData);
         
-        maskConfigs[name] = { templateDots, eroded80x120, pixelCount, dbNorms, erodedBitmap };
+        maskConfigs[name] = { templateDots, slotIndices: tdSlotIndices, eroded80x120, pixelCount, dbNorms, erodedBitmap };
     }
 }
 
@@ -608,7 +615,10 @@ function runMatchingPipeline() {
             }
         }
         
-        if (dotCount > 10) {
+        const templateArea = templateDots[0].area;
+        const scale = Math.sqrt(dotCount / templateArea);
+        
+        if (dotCount > 10 && scale >= 0.75 && scale <= 1.5) {
             const cx = sumX / dotCount;
             const cy = sumY / dotCount;
             srcPts.push({x: templateDots[0].cx, y: templateDots[0].cy});
@@ -658,7 +668,15 @@ function runMatchingPipeline() {
             binaryMask[i] = dist > 70 ? 1 : 0;
         }
         
-        const queryDots = getDotProperties(binaryMask, 224, 224);
+        let queryDots = getDotProperties(binaryMask, 224, 224);
+        
+        // Filter by size: 75% to 150% scale relative to average template dot size
+        const avgTemplateArea = templateDots.reduce((sum, td) => sum + td.area, 0) / templateDots.length;
+        queryDots = queryDots.filter(qd => {
+            const scale = Math.sqrt(qd.area / avgTemplateArea);
+            return scale >= 0.75 && scale <= 1.5;
+        });
+        
         if (queryDots.length < templateDots.length) {
             drawOverlay();
             showStatus(`Align all ${templateDots.length} dots...`);
@@ -835,6 +853,7 @@ function runMatchingPipeline() {
     for (const match of topCurrent) {
         if (match.score < 0.45) continue; // Filter bad matches
         if (bannedEntries.has(match.name)) continue;
+        if (!songMetadata[match.name]) continue; // Only show active songs
         const existing = sessionTopMatches.find(m => m.name === match.name);
         if (existing) {
             if (match.score > existing.score) {
@@ -869,73 +888,97 @@ function renderMatches(topMatches) {
     
     topMatches.forEach((match, index) => {
         const scorePercentage = Math.max(0, Math.min(100, match.score * 100));
-        const thumbUrl = jacketUrlMap[match.name] || `jackets/${encodeURIComponent(match.name)}`;
+        const baseName = match.name.substring(0, match.name.lastIndexOf('.'));
+        const thumbUrl = `thumbnails/${encodeURIComponent(baseName)}.webp`;
+        
+        const meta = songMetadata[match.name] || { title: match.name, artist: "Unknown Artist" };
         
         const matchItem = document.createElement("div");
         matchItem.className = `match-item ${index === 0 ? "rank-1" : ""}`;
         matchItem.style.flexDirection = "column";
         
         matchItem.innerHTML = `
-            <div class="match-header" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 1rem;">
-                <div class="match-name" title="${match.name}" style="flex: 1;">${match.name}</div>
-                <div class="score-container" style="min-width: 100px; flex-shrink: 0; text-align: right; display: flex; align-items: center; gap: 8px;">
-                    <div style="flex: 1;">
+            <div style="display: flex; width: 100%; gap: 0.75rem; align-items: flex-start;">
+                <!-- Thumbnail -->
+                <img src="${thumbUrl}" alt="Jacket" style="width: 60px; height: 60px; object-fit: cover; border-radius: var(--radius-sm); display: block; flex-shrink: 0;">
+                
+                <!-- Title and Artist -->
+                <div style="flex: 1; min-width: 0;">
+                    <div class="match-name" title="${meta.title}" style="width: 100%; font-size: 1.1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.title}</div>
+                    <div class="match-artist" style="width: 100%; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.artist}</div>
+                </div>
+                
+                <!-- X button and Score -->
+                <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; min-width: 80px;">
+                    <button class="ban-btn" data-name="${match.name}" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0; line-height: 1;" title="Temporarily ban this match">✖</button>
+                    <div class="score-container" style="width: 100%; text-align: right; margin-top: 4px;">
                         <div class="score-text" style="font-weight: bold; margin-bottom: 4px;">${match.score.toFixed(4)}</div>
-                        <div class="score-bar-bg">
-                            <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
+                        <div class="score-bar-bg" style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
+                            <div class="score-bar-fill" style="width: ${scorePercentage}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 3px;"></div>
                         </div>
                     </div>
-                    <button class="ban-btn" data-name="${match.name}" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0;" title="Temporarily ban this match">✖</button>
                 </div>
             </div>
-            <div class="match-content" style="display: flex; justify-content: flex-end; width: 100%; margin-top: 0.5rem; gap: 0; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 4px; overflow: hidden;">
+            
+            <div class="match-content" style="display: flex; align-items: center; width: 100%; margin-top: 0.75rem; gap: 0.75rem; overflow-x: auto; padding-bottom: 4px;">
+                <div class="dots-container" style="display: flex; gap: 6px; flex-shrink: 0; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 4px;">
+                </div>
             </div>
         `;
         
-        const matchContent = matchItem.querySelector('.match-content');
-        
-        const thumbImg = document.createElement("img");
-        thumbImg.src = thumbUrl;
-        thumbImg.alt = "Jacket";
-        thumbImg.style.width = "60px";
-        thumbImg.style.height = "90px";
-        thumbImg.style.objectFit = "cover";
-        thumbImg.style.display = "block";
-        matchContent.appendChild(thumbImg);
-        
-        const qCanvas = document.createElement("canvas");
-        qCanvas.width = 80; qCanvas.height = 120;
-        qCanvas.style.width = "60px"; qCanvas.style.height = "90px";
-        qCanvas.style.backgroundColor = "#000";
-        qCanvas.style.imageRendering = "pixelated";
-        qCanvas.style.display = "block";
-        if (match.queryImageData) qCanvas.getContext("2d").putImageData(match.queryImageData, 0, 0);
-        matchContent.appendChild(qCanvas);
-        
-        const rCanvas = document.createElement("canvas");
-        rCanvas.width = 80; rCanvas.height = 120;
-        rCanvas.style.width = "60px"; rCanvas.style.height = "90px";
-        rCanvas.style.backgroundColor = "#000";
-        rCanvas.style.imageRendering = "pixelated";
-        rCanvas.style.display = "block";
-        const rCtx = rCanvas.getContext("2d", { willReadFrequently: true });
-        
-        const cols = Math.floor(spriteCanvas.width / 80);
-        const sx = (match.index % cols) * 80;
-        const sy = Math.floor(match.index / cols) * 120;
-        rCtx.drawImage(spriteCanvas, sx, sy, 80, 120, 0, 0, 80, 120);
-        
+        const dotsContainer = matchItem.querySelector('.dots-container');
         const config = maskConfigs[activeMaskName];
-        if (config) {
-            const refData = rCtx.getImageData(0, 0, 80, 120);
+        
+        if (config && config.slotIndices) {
+            const rCtxTemp = document.createElement("canvas").getContext("2d");
+            rCtxTemp.canvas.width = 80; rCtxTemp.canvas.height = 120;
+            const cols = Math.floor(spriteCanvas.width / 80);
+            const sx = (match.index % cols) * 80;
+            const sy = Math.floor(match.index / cols) * 120;
+            rCtxTemp.drawImage(spriteCanvas, sx, sy, 80, 120, 0, 0, 80, 120);
+            
+            const refData = rCtxTemp.getImageData(0, 0, 80, 120);
             for (let i = 0; i < 80 * 120; i++) {
                 if (!config.eroded80x120[i]) {
                     refData.data[i*4] = refData.data[i*4+1] = refData.data[i*4+2] = 0;
                 }
             }
-            rCtx.putImageData(refData, 0, 0);
+            rCtxTemp.putImageData(refData, 0, 0);
+
+            config.slotIndices.forEach(slotIdx => {
+                const slot = GRID_SLOTS[slotIdx];
+                const dotPair = document.createElement("div");
+                dotPair.style.display = "flex";
+                dotPair.style.flexDirection = "column";
+                dotPair.style.gap = "2px";
+                
+                const qCanvas = document.createElement("canvas");
+                qCanvas.width = 40; qCanvas.height = 40;
+                qCanvas.style.width = "40px"; qCanvas.style.height = "40px";
+                qCanvas.style.backgroundColor = "#000";
+                qCanvas.style.imageRendering = "pixelated";
+                qCanvas.title = "Query";
+                
+                if (match.queryImageData) {
+                    const qCtx = qCanvas.getContext("2d");
+                    qCtx.putImageData(match.queryImageData, -slot.x + 20, -slot.y + 20);
+                }
+                
+                const rCanvas = document.createElement("canvas");
+                rCanvas.width = 40; rCanvas.height = 40;
+                rCanvas.style.width = "40px"; rCanvas.style.height = "40px";
+                rCanvas.style.backgroundColor = "#000";
+                rCanvas.style.imageRendering = "pixelated";
+                rCanvas.title = "Reference";
+                
+                const rCtx = rCanvas.getContext("2d");
+                rCtx.drawImage(rCtxTemp.canvas, slot.x - 20, slot.y - 20, 40, 40, 0, 0, 40, 40);
+                
+                dotPair.appendChild(qCanvas);
+                dotPair.appendChild(rCanvas);
+                dotsContainer.appendChild(dotPair);
+            });
         }
-        matchContent.appendChild(rCanvas);
         
         matchesList.appendChild(matchItem);
     });

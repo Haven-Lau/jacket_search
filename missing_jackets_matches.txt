@@ -1,0 +1,271 @@
+--- Missing Jackets with Similar Matches Found ---
+Song: ANEMONE -GITADORA EDITION- (ANEMONE) -> Closest Jacket: SEA_ANEMONES
+Song: Any% (GITADORA Edition) (Any_Percent_(GITADORA_Edition)) -> Closest Jacket: Triple_Cross_-GITADORA_Edition-
+Song: Din Don Dan (GITADORA ver.) (Din_Don_Dan_(GITADORA_ver.)) -> Closest Jacket: Sola_GITADORA_ver.
+Song: ENDYMION (GITADORA Edition) (ENDYMION_(GITADORA_Edition)) -> Closest Jacket: Yoru_no_joou_no_aria(GITADORA_Edition)
+Song: HARUKAZE (HARUKAZE_(BEMANI_Sound_Team_%22TATSUYA%22)) -> Closest Jacket: HARUKAZE_(BEMANI_Sound_Team__TATSUYA_)
+Song: in the dark (In_the_dark) -> Closest Jacket: After_dark
+Song: Lachryma《Re:Queen’M》 (GITADORA Edition) (Lachryma(Re:Queen%27M)_(GITADORA_Edition)) -> Closest Jacket: Lachryma(Re_Queen'M)_GRV
+Song: Lawes's Parotia (Lawes%27s_Parotia) -> Closest Jacket: Lawes's_Parotia
+Song: Neoverse (Neoverse) -> Closest Jacket: Yuusei_overdose
+Song: Paradigm Shift (Paradigm_Shift) -> Closest Jacket: Paradigm_Shift_MXM
+Song: Reason (Reason) -> Closest Jacket: Rejoin
+Song: RUINA (GITADORA EDITION) (RUINA_(GITADORA_EDITION)) -> Closest Jacket: RUINA(GITADORA_EDITION)
+Song: Shooting Star (GITADORA ver.) (Shooting_Star_(GITADORA_ver.)) -> Closest Jacket: Sola_GITADORA_ver.
+Song: Smintheus (GITADORA Edition) (Smintheus_(GITADORA_Edition)) -> Closest Jacket: Triple_Cross_-GITADORA_Edition-
+Song: smooooch・∀・ (GITADORA ver.) (Smooooch_(GITADORA_ver.)) -> Closest Jacket: Sola_GITADORA_ver.
+Song: XENOViA (GITADORA Edition) (XENOViA_(GITADORA_Edition)) -> Closest Jacket: Triple_Cross_-GITADORA_Edition-
+Song: ZIGZAG COWBOY (GITADORA EDITION) (ZIGZAG_COWBOY_(GITADORA_EDITION)) -> Closest Jacket: RUINA(GITADORA_EDITION)
+Song: 朱と碧のランページ (GITADORA ver.) (Aka_to_ao_no_rampage_(GITADORA_ver.)) -> Closest Jacket: Aka_to_ao_no_rampage_ReGLOSS
+Song: 青と夏 (Ao_to_natsu) -> Closest Jacket: Ringo_to_hachimitsu
+Song: カジノファイヤーことみちゃん (GITADORA ver.) (Casino_fire_Kotomi-chan_(GITADORA_ver.)) -> Closest Jacket: Casino_fire_Kotomi-chan_ReGLOSS
+Song: 人類の進歩と調和？ (Jinrui_no_shinpo_to_chouwa%3F) -> Closest Jacket: Jinrui_no_shinpo_to_chouwa
+Song: 冥 (GITADORA Edition) (Mei_(GITADORA_Edition)) -> Closest Jacket: Triple_Cross_-GITADORA_Edition-
+Song: リメンバーリメンバー (GITADORA ver.) (Remember_remember_(GITADORA_ver.)) -> Closest Jacket: Remember_remember_ReGLOSS
+Song: シュレーディンガーの猫 (GITADORA Edition) (Schrodinger_no_neko_(GITADORA_Edition)) -> Closest Jacket: Yoru_no_joou_no_aria(GITADORA_Edition)
+Song: 咲い咄 (Warai_banashi) -> Closest Jacket: Harumachi_bana
+Song: Graint (Graint) -> Closest Jacket: Graviton
+Song: SUPER HEROINE!! (SUPER_HEROINE!!) -> Closest Jacket: SUPER_HEROINE!!_MXM
+Song: シューティンスター★☆ (Shootin%27_star) -> Closest Jacket: Shootin'_star
+Song: Crescent:Letter (Crescent:Letter) -> Closest Jacket: Crescent_Letter
+Song: Ouroboros (Ouroboros_(BEMANI_Sound_Team_%22asaki%22)) -> Closest Jacket: Mobius_(BEMANI_Sound_Team_Yoshihiko_Koezuka)
+Song: Touch Me (Touch_Me_(BEMANI_Sound_Team_%22GekiReco_%26_Sota_F.%22)) -> Closest Jacket: Touch_Me_GekiReco_&_Sota_F
+Song: What's up? (What%27s_up%3F) -> Closest Jacket: What's_up
+Song: グッバイ宣言 (Goodbye_sengen) -> Closest Jacket: Goodbye_sengen_GITADORA
+Song: 流離 (Sasurai_(PON)) -> Closest Jacket: Sasurai
+Song: 零と弌の鍵の唄 (Zero_to_ichi_no_kagi_no_uta) -> Closest Jacket: Zero_to_ichi_no_kagi_no_uta_nostalgia
+Song: Bonetrousle (Bonetrousle) -> Closest Jacket: Bonetrousle_GITADORA
+Song: Devil's Rule (Devil%27s_Rule) -> Closest Jacket: Devil's_Rule
+Song: Last Goodbye / これでホントにサヨナラ (_Kore_de_honto_ni_sayonara) -> Closest Jacket: Last_Goodbye_-_Kore_de_honto_ni_sayonara
+Song: MEGALOVANIA (MEGALOVANIA) -> Closest Jacket: MEGALOVANIA_GD
+Song: Mobius (Mobius_(BEMANI_Sound_Team_%22Yoshihiko_Koezuka%22)) -> Closest Jacket: Mobius_(BEMANI_Sound_Team_Yoshihiko_Koezuka)
+Song: VOLAQUAS -GITADO ROCK ver.- (VOLAQUAS_-GITADO_ROCK_ver.-) -> Closest Jacket: IX_-GITADOROCK_ver.-
+Song: we're gamers (We%27re_gamers) -> Closest Jacket: We're_gamers
+Song: 交響曲第9番第4楽章"歓喜の歌"(GITADORA Edition) (Koukyoukyoku_dai_9_ban_dai_4_gakushou_%22Kanki_no_uta%22(GITADORA_Edition)) -> Closest Jacket: Koukyoukyoku_dai_9_ban_dai_4_gakushou_Kanki_no_uta(GITADORA_Edition)
+Song: 神奏曲:ライトニング (Shinsoukyoku:lightning) -> Closest Jacket: Shinsoukyoku_lightning
+Song: 40℃ Desert (40%C2%B0C_Desert) -> Closest Jacket: 40°C_Desert
+Song: clear:wings (Clear:wings) -> Closest Jacket: Clear_wings_MXM
+Song: EMPIRE OF FLAME (EMPIRE_OF_FLAME) -> Closest Jacket: EMPIRE_OF_FLAME_EXH
+Song: La fame di Adria (La_fame_di_Adria) -> Closest Jacket: La_fame_di_Adria_GITADOROCK
+Song: Last Concerto (Last_Concerto) -> Closest Jacket: Last_Concerto_EXH
+Song: NEX＋AGE (NEX%2BAGE) -> Closest Jacket: NEX+AGE
+Song: Sparkle Smilin' -GITADORA EDITION- (Sparkle_Smilin%27_-GITADORA_EDITION-) -> Closest Jacket: Sparkle_Smilin'_-GITADORA_EDITION-
+Song: 彼女は快刀乱麻(GITADORA ver.) (Kanojo_wa_kaitou_Ranma(GITADORA_ver.)) -> Closest Jacket: Kanojo_wa_kaitou_Ranma
+Song: ぱんだしんけん１、２、３ ～ちえ！おっしょさんにはかなわないや！～ (Panda_shinken_1,2,3_~chie!_Ossho-san_ni_wa_kanawanaiya!~) -> Closest Jacket: Panda_shinken_1,2,3_~chie!_Ossho-san_ni_wa_kanawanaiya!~_BEAST
+Song: ラビカル：トラップ (Rabbical:trap) -> Closest Jacket: Rabbical_trap
+Song: Afterimage d'automne (Afterimage_d%27automne) -> Closest Jacket: Afterimage_d'automne
+Song: HANABI (HANABI) -> Closest Jacket: MANA
+Song: Knights Assault (Knights_Assault) -> Closest Jacket: Knights_Assault_(MXM)
+Song: Let's Dance (Let%27s_Dance_(colored_strings)) -> Closest Jacket: Let's_Dance_(colored_strings)
+Song: U.N.オーエンは彼女なのか？ (U.N._Owen_wa_kanojona_no_ka%3F_(Kisida_Kyoudan_%26_THE_Akeboshi_Rockets)) -> Closest Jacket: U.N._Owen_wa_kanojona_no_ka_(Kisida_Kyoudan_&_THE_Akeboshi_Rockets)
+Song: ひまわり∗EXCHAIN (Himawari*EXCHAIN) -> Closest Jacket: Himawari_EXCHAIN
+Song: 蛹　再 (Sanagi_sai) -> Closest Jacket: Sanagi_sai_GFDM
+Song: 千本桜 (Senbonzakura) -> Closest Jacket: Senbonzakura_GD
+Song: Beginning (Beginning_(BEMANI_Sound_Team_%22TAG%22)) -> Closest Jacket: Beginning_(BEMANI_Sound_Team__TAG_)
+Song: Prey (Prey) -> Closest Jacket: Peyotl
+Song: Sweet feelin' (Sweet_feelin%27) -> Closest Jacket: Sweet_feelin'
+Song: フリップブック*ストーリー (Flip_book*story) -> Closest Jacket: Flip_book_story
+Song: 幾何学的『トリックスター』 (Kikagakuteki_%22Trickster%22) -> Closest Jacket: Kikagakuteki_Trickster
+Song: 摩天楼ノ特異点～Anti;HERO (Matenrou_no_tokuiten~Anti;HERO) -> Closest Jacket: Matenrou_no_tokuiten~Anti_HERO
+Song: ミカヅキ:コネクト (Mikazuki:connect) -> Closest Jacket: Mikazuki_connect
+Song: ミラクル・スイート・スイーツ・マジック！！ (Miracle_sweet_sweets_magic!!) -> Closest Jacket: Miracle_sweet_sweets_magic
+Song: レゾンデートル、前線より (Raison_d%27etre,_zensen_yori) -> Closest Jacket: Raison_d'etre,_zensen_yori
+Song: Ater Regis -Alius- (Ater_Regis_-Alius-) -> Closest Jacket: Ater_Regis
+Song: Dreamer's High (Dreamer%27s_High) -> Closest Jacket: Dreamer's_High
+Song: 準備運動 (Junbi_undou) -> Closest Jacket: Junbi_undou_MXM
+Song: 朧 (Oboro) -> Closest Jacket: Ouroboros
+Song: シュガーソングとビターステップ (Sugar_song_to_bitter_step) -> Closest Jacket: Sugar_song_to_bitter_step_cover
+Song: Good bye, Summer～さよならは言わない～ (Good_bye,_Summer~sayonara_wa_iwanai~) -> Closest Jacket: Good_bye,_Summer~sayonara_wa_iwanai~_GFDM
+Song: My Way, My Life (My_Way,_My_Life) -> Closest Jacket: My_Way_My_Life
+Song: neko＊neko (Neko*neko) -> Closest Jacket: Neko_neko
+Song: めた・メタ？ひまわり＊パンチ (Meta-meta%3F_Himawari_Punch) -> Closest Jacket: Meta-meta_Himawari_Punch
+Song: 水面静かに大地の烈日わたらせて　-Remaster- (Minamo_shizuka_ni_daichi_no_retsujiru_watarasete) -> Closest Jacket: Minamo_shizuka_ni_daichi_no_retsujiru_watarasete_-Remaster-
+Song: LEMON & SALT (LEMON_%26_SALT) -> Closest Jacket: LEMON_&_SALT
+Song: Re:GENERATION (Re:GENERATION) -> Closest Jacket: ReGENERATION
+Song: Summer '64 (Summer_%2764) -> Closest Jacket: Summer_'64
+Song: だから君じゃない。 (Dakara_kimi_janai.) -> Closest Jacket: Dakara_kimi_janai
+Song: 過食性:アイドル症候群 (Kashokusei:_idol_shoukougun) -> Closest Jacket: Kashokusei_idol_shoukougun
+Song: 煌-灼熱の裁き- (Kira-shakunetsu_no_sabaki-) -> Closest Jacket: Kira-shakunetsu_no_sabaki-_GITADORA
+Song: めた・メタ？ひまわり＊パンチ -デモテープVer.- (Meta-meta%3F_Himawari_Punch_-demo_tape_Ver.-) -> Closest Jacket: Meta-meta_Himawari_Punch_-demo_tape_Ver.-
+Song: とってもとっても、ありがとう。 (Tottemo_tottemo,_arigatou.) -> Closest Jacket: Tottemo_tottemo,_arigatou
+Song: 残酷な天使のテーゼ (Zankoku_na_tenshi_no_these) -> Closest Jacket: Zankoku_na_tenshi_no_these_GITADORA
+Song: Don't Break Up (Don%27t_Break_Up) -> Closest Jacket: Don't_Break_Up
+Song: Factor of adhesion (Factor_of_adhesion) -> Closest Jacket: Factor_of_adhesion_jk
+Song: Like&Love (Like%26Love) -> Closest Jacket: Like&Love
+Song: OVERHEAT -Type GD- (OVERHEAT_-Type_GD-) -> Closest Jacket: OVERHEAT
+Song: 天ノ弱 (Amanojaku) -> Closest Jacket: Amanojaku_NOV
+Song: デストロイマーチ (Destroy_march) -> Closest Jacket: Destroy_march_NOV
+Song: 羽根亡キ少女唄 (Hanenaki_shoujo_uta) -> Closest Jacket: Hanenaki_shoujo_uta_old
+Song: 三毛猫ロックンロール (Mikeneko_rock%27n%27roll) -> Closest Jacket: Mikeneko_rock'n'roll
+Song: CHAIN REACTION feat.NO+CHIN (CHAIN_REACTION_feat.NO%2BCHIN) -> Closest Jacket: CHAIN_REACTION_feat.NO+CHIN
+Song: I'm so Happy (Rockin' ver.) (I%27m_so_Happy_(Rockin%27_ver.)) -> Closest Jacket: I'm_so_Happy_(Rockin'_ver.)
+Song: Predator's Crypto Pt.1 (Predator%27s_Crypto_Pt.1) -> Closest Jacket: Predator's_Crypto_Pt.1
+Song: Predator's Crypto Pt.2 (Predator%27s_Crypto_Pt.2) -> Closest Jacket: Predator's_Crypto_Pt.2
+Song: Bangin' Breaks (Bangin%27_Breaks) -> Closest Jacket: Bangin'_Breaks
+Song: FIFTH GIG TYPE II (FIFTH_GIG_TYPE_II) -> Closest Jacket: FIFTH_GIG
+Song: no way... (No_way...) -> Closest Jacket: No_way_...
+Song: 風／雷 (rai) -> Closest Jacket: Gai
+Song: You've Got 2 Get Me (You%27ve_Got_2_Get_Me) -> Closest Jacket: You've_Got_2_Get_Me
+Song: 三毛猫JIVE＆ジャイブ (Mikeneko_JIVE%26Jive) -> Closest Jacket: Mikeneko_JIVE&Jive
+Song: 空色デイズ (Sorairo_days) -> Closest Jacket: Sorairo_days_GFDM
+Song: 1/n (n) -> Closest Jacket: 1n
+Song: Icicles (Icicles) -> Closest Jacket: Icicles_GFDM
+Song: Karma (Karma_(baked_new_jack)) -> Closest Jacket: Karma_(baked_new_jack)_old
+Song: She's the Bug (She%27s_the_Bug) -> Closest Jacket: She's_the_Bug
+Song: 創聖のアクエリオン (Sousei_no_Aquarion) -> Closest Jacket: Sousei_no_Aquarion_GFDM
+Song: DEADMAN'S BED (DEADMAN%27S_BED) -> Closest Jacket: DEADMAN'S_BED
+Song: How do you feel? (How_do_you_feel%3F) -> Closest Jacket: How_do_you_feel
+Song: murmur twins (guitar pop ver.) (Murmur_twins(guitar_pop_ver.)) -> Closest Jacket: Murmur_twins_(guitar_pop_ver.)
+Song: Day's! (Day%27s!) -> Closest Jacket: Day's!
+Song: Magic words ? (Magic_words_%3F) -> Closest Jacket: Magic_words
+Song: Tizona d'El Cid (Tizona_d%27El_Cid) -> Closest Jacket: Tizona_d'El_Cid
+Song: HEAVEN'S COCKTAIL (HEAVEN%27S_COCKTAIL) -> Closest Jacket: HEAVEN'S_COCKTAIL
+Song: Little Prayer (CLASSIC) (Little_Prayer) -> Closest Jacket: Little_prayer
+Song: You can't do it if you try (You_can%27t_do_it_if_you_try) -> Closest Jacket: You_can't_do_it_if_you_try
+Song: You'll be a man (You%27ll_be_a_man) -> Closest Jacket: You'll_be_a_man
+Song: CLASSIC PARTY 復活。 (CLASSIC_PARTY_fukkatsu.) -> Closest Jacket: CLASSIC_PARTY_fukkatsu
+Song: Dragon Blade (CLASSIC) (Dragon_Blade) -> Closest Jacket: Dragon_Blade_old
+Song: ☆shining☆(GF&dm style) (Shining(GF%26dm_style)) -> Closest Jacket: Shining(GF&dm_style)
+Song: YARA TUM KAHAN? (YARA_TUM_KAHAN%3F) -> Closest Jacket: YARA_TUM_KAHAN
+Song: pot-pourri d'marmalade (Pot-pourri_d%27marmalade) -> Closest Jacket: Pot-pourri_d'marmalade
+Song: I'm a loser (I%27m_a_loser) -> Closest Jacket: I'm_a_loser
+Song: MAD BLAST (MAD_BLAST) -> Closest Jacket: MASTA_BLASTA
+Song: 大見解 (Daikenkai) -> Closest Jacket: Daikenkai_GFDM
+Song: BRE∀K DOWN! (GF&DM STYLE) (CLASSIC) (BREAK_DOWN!_(GF%26DM_STYLE)) -> Closest Jacket: BREAK_DOWN!_(GF&DM_STYLE)
+Song: Homesick Pt.2&3 (Homesick_Pt.2%263) -> Closest Jacket: Homesick_Pt.2&3
+Song: Moonlight Walkin' (Moonlight_Walkin%27) -> Closest Jacket: Moonlight_Walkin'
+Song: ROCKIN' PARADISE (ROCKIN%27_PARADISE) -> Closest Jacket: ROCKIN'_PARADISE
+Song: 誰? (Dare%3F) -> Closest Jacket: Dare
+Song: FIREBALL (FIREBALL) -> Closest Jacket: FIRE
+Song: DEPEND ON ME (Long Version) (DEPEND_ON_ME_(CD_Version)) -> Closest Jacket: DEPEND_ON_ME_(Long_Version)
+Song: CAPTAIN'S VOYAGE (CLASSIC) (CAPTAIN%27S_VOYAGE) -> Closest Jacket: CAPTAIN'S_VOYAGE
+Song: I'M GONNA GET YOU! (I%27M_GONNA_GET_YOU!) -> Closest Jacket: I'M_GONNA_GET_YOU!
+Song: Heaven is a '57 metallic gray (Heaven_is_a_%2757_metallic_gray) -> Closest Jacket: Heaven_is_a_'57_metallic_gray
+Song: LUCKY? STAFF (LUCKY%3F_STAFF) -> Closest Jacket: LUCKY_STAFF
+Song: Dance the Night Away (Dance_the_night_away) -> Closest Jacket: Dance_the_Night_Away
+Song: Lover's High (Lover%27s_High) -> Closest Jacket: Lover's_High
+Song: memories (Memories_(TAKA)) -> Closest Jacket: Memories
+Song: 純勉夏 (Junbenka) -> Closest Jacket: Junbenka_old
+Song: Main page (Main_Page) -> Closest Jacket: Mind_game
+Song: pop'n music (Pop%27n_music_Information) -> Closest Jacket: Pop_music_ron
+
+--- Completely Missing Jackets ---
+Song: 1 New Songs (106 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#New_Songs_(106_Songs))
+Song: 2 Returning Songs (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#Returning_Songs)
+Song: 2.1 GITADORA GALAXY WAVE (68 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_GALAXY_WAVE_(68_Songs))
+Song: 2.2 GITADORA FUZZ-UP (84 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_FUZZ-UP_(84_Songs))
+Song: 2.3 GITADORA HIGH-VOLTAGE (108 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_HIGH-VOLTAGE_(108_Songs))
+Song: 2.4 GITADORA NEX+AGE (76 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_NEX+AGE_(76_Songs))
+Song: 2.5 GITADORA EXCHAIN (85 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_EXCHAIN_(85_Songs))
+Song: 2.6 GITADORA Matixx (76 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_Matixx_(76_Songs))
+Song: 2.7 GITADORA Tri-Boost Re:EVOLVE (45 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_Tri-Boost_Re:EVOLVE_(45_Songs))
+Song: 2.8 GITADORA Tri-Boost (121 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_Tri-Boost_(121_Songs))
+Song: 2.9 GITADORA OverDrive (69 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_OverDrive_(69_Songs))
+Song: 2.10 GITADORA (141 songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GITADORA_(141_songs))
+Song: 2.11 GuitarFreaksXG3 & DrumManiaXG3 (67 songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaksXG3_&_DrumManiaXG3_(67_songs))
+Song: 2.12 GuitarFreaksXG2 & DrumManiaXG2 (62 Songs + 6 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaksXG2_&_DrumManiaXG2_(62_Songs_+_6_CLASSIC_Charts))
+Song: 2.12.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts)
+Song: 2.13 GuitarFreaksXG & DrumManiaXG (48 Songs + 11 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaksXG_&_DrumManiaXG_(48_Songs_+_11_CLASSIC_Charts))
+Song: 2.13.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_2)
+Song: 2.14 GuitarFreaks V6 & DrumMania V6 BLAZING!!!! (35 Songs + 8 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaks_V6_&_DrumMania_V6_BLAZING!!!!_(35_Songs_+_8_CLASSIC_Charts))
+Song: 2.14.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_3)
+Song: 2.15 GuitarFreaks V5 & DrumMania V5 Rock to Infinity (36 Songs + 9 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaks_V5_&_DrumMania_V5_Rock_to_Infinity_(36_Songs_+_9_CLASSIC_Charts))
+Song: 2.15.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_4)
+Song: 2.16 GuitarFreaks V4 & DrumMania V4 ЯockxRock (34 Songs + 6 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaks_V4_&_DrumMania_V4_%D0%AFockxRock_(34_Songs_+_6_CLASSIC_Charts))
+Song: 2.16.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_5)
+Song: 2.17 GuitarFreaks V3 & DrumMania V3 (24 Songs + 8 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaks_V3_&_DrumMania_V3_(24_Songs_+_8_CLASSIC_Charts))
+Song: 2.17.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_6)
+Song: 2.18 GuitarFreaks V2 & DrumMania V2 (23 Songs + 4 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaks_V2_&_DrumMania_V2_(23_Songs_+_4_CLASSIC_Charts))
+Song: 2.18.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_7)
+Song: 2.19 GuitarFreaks V & DrumMania V (32 Songs + 4 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GuitarFreaks_V_&_DrumMania_V_(32_Songs_+_4_CLASSIC_Charts))
+Song: 2.19.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_8)
+Song: 2.20 GUITARFREAKS 11thMIX & drummania 10thMIX (23 Songs + 6 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_11thMIX_&_drummania_10thMIX_(23_Songs_+_6_CLASSIC_Charts))
+Song: 2.20.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_9)
+Song: 2.21 GUITARFREAKS 10thMIX & drummania 9thMIX (25 Songs + 5 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_10thMIX_&_drummania_9thMIX_(25_Songs_+_5_CLASSIC_Charts))
+Song: 2.21.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_10)
+Song: 2.22 GUITARFREAKS 9thMIX & drummania 8thMIX (23 Songs + 4 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_9thMIX_&_drummania_8thMIX_(23_Songs_+_4_CLASSIC_Charts))
+Song: 2.22.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_11)
+Song: 2.23 GUITARFREAKS 8thMIX & drummania 7thMIX (27 Songs + 3 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_8thMIX_&_drummania_7thMIX_(27_Songs_+_3_CLASSIC_Charts))
+Song: 2.23.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_12)
+Song: 2.24 GUITARFREAKS 7thMIX & drummania 6thMIX (21 Songs + 5 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_7thMIX_&_drummania_6thMIX_(21_Songs_+_5_CLASSIC_Charts))
+Song: 2.24.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_13)
+Song: 2.25 GUITARFREAKS 6thMIX & drummania 5thMIX (21 Songs + 5 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_6thMIX_&_drummania_5thMIX_(21_Songs_+_5_CLASSIC_Charts))
+Song: 2.25.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_14)
+Song: 2.26 GUITARFREAKS 5thMIX & drummania 4thMIX (11 Songs + 3 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_5thMIX_&_drummania_4thMIX_(11_Songs_+_3_CLASSIC_Charts))
+Song: 2.26.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_15)
+Song: 2.27 GUITARFREAKS 4thMIX & drummania 3rdMIX (8 Songs + 3 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_4thMIX_&_drummania_3rdMIX_(8_Songs_+_3_CLASSIC_Charts))
+Song: 2.27.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_16)
+Song: 2.28 GUITARFREAKS 3rdMIX & drummania 2ndMIX (8 Songs + 2 CLASSIC Charts) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_3rdMIX_&_drummania_2ndMIX_(8_Songs_+_2_CLASSIC_Charts))
+Song: 2.28.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_17)
+Song: 2.29 GUITARFREAKS 2ndMIX / drummania (8 Songs + 2 CLASSIC Charts) (_drummania_(8_Songs_+_2_CLASSIC_Charts))
+Song: 2.29.1 CLASSIC Charts (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#CLASSIC_Charts_18)
+Song: 2.30 GUITARFREAKS (5 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#GUITARFREAKS_(5_Songs))
+Song: 2.31 ee'MALL 2nd avenue (12 Songs) (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List#ee'MALL_2nd_avenue_(12_Songs))
+Song: CHECKER FLAG (CHECKER_FLAG)
+Song: D光石火 (Dkou_sekka)
+Song: I, the Dreamer (I,_the_Dreamer)
+Song: Quantum Game feat. 櫻井有紀 (Quantum_Game_feat._Sakurai_Yuki)
+Song: Ramen Messiah: Type A (Ramen_Messiah:_Type_A)
+Song: Ramen Messiah: Type B (Ramen_Messiah:_Type_B)
+Song: ドーナツホール 2024 (Donut_hole)
+Song: ヒバナ (Reloaded) (Hibana_(Reloaded))
+Song: 完全感覚Dreamer (Kanzen_kankaku_Dreamer)
+Song: メタルラブ・メソッド (Metal_love_method)
+Song: もうあおむけでいくしかない GITADORA MIX DE IKU SHIKA NAI Edition (Mou_aomukede_iku_shikanai)
+Song: レシピのリドル (Recipe_no_riddle)
+Song: ロキ (Roki_(mikitoP))
+Song: 龍吟雲起 虎嘯風生 feat. Nana Takahashi / 709sec. (_709sec.)
+Song: 天上天下唯我独尊 (Tenjou_tenge_yuiga_dokuson)
+Song: Arcadia (Arcadia_(Maro_feat.Rie_Fujishiro))
+Song: Crystal Breath feat. Sennzai (Crystal_Breath_feat._Sennzai)
+Song: KING (KING_(Kanaria))
+Song: 寂寞たる世界の終末は (Sekibakutaru_sekai_no_shuumatsu_wa)
+Song: Fly far bounce (Fly_far_bounce)
+Song: Skyscraper (Skyscraper_(Mutsuhiko_Izumi))
+Song: Colors (Colors_(Yurie_Suzuki))
+Song: Endless Chain ～2人でトリガーをひこう～ (Endless_Chain_~futari_de_trigger_wo_hikou~)
+Song: PATRIOT'S DREAM(美しく花と散れ) (PATRIOT%27S_DREAM(utsukushiku_hana_to_chire))
+Song: つぼみ (Tsubomi_(Megumi_Tatsumi_featured_by_Hiroaki_Sano))
+Song: DAWN (DAWN_(Melodyout))
+Song: DESTINY (DESTINY_(GALNERYUS))
+Song: Siren (Siren_(Sis_Bond_Chit))
+Song: 777 (777)
+Song: Song Lists (Category:Song_Lists)
+Song: Log in (index.php?title=Special:UserLogin&returnto=GITADORA+GALAXY+WAVE+DELTA+Full+Song+List)
+Song: Related changes (GITADORA_GALAXY_WAVE_DELTA_Full_Song_List)
+Song: Discussion (index.php?title=Talk:GITADORA_GALAXY_WAVE_DELTA_Full_Song_List&action=edit&redlink=1)
+Song: View source (index.php?title=GITADORA_GALAXY_WAVE_DELTA_Full_Song_List&action=edit)
+Song: View history (index.php?title=GITADORA_GALAXY_WAVE_DELTA_Full_Song_List&action=history)
+Song: Random page (Special:Random)
+Song: Recent changes (Special:RecentChanges)
+Song: On public registration (RemyWiki:Public_registration)
+Song: Wiki edit rules (RemyWiki:Rules)
+Song: Site to-do list (RemyWiki:Todo)
+Song: beatmania IIDX (Beatmania_IIDX_Information)
+Song: DanceDanceRevolution (DanceDanceRevolution_Information)
+Song: GITADORA (GITADORA_Information)
+Song: jubeat (Jubeat_Information)
+Song: SOUND VOLTEX (SOUND_VOLTEX_Information)
+Song: NOSTALGIA (NOSTALGIA_Information)
+Song: DANCERUSH (DANCERUSH_Information)
+Song: DANCE aROUND (DANCE_aROUND_Information)
+Song: Polaris Chord (Polaris_Chord_Information)
+Song: beatmania (Beatmania_Information)
+Song: pop'n stage (Pop%27n_stage_Information)
+Song: KEYBOARDMANIA (KEYBOARDMANIA_Information)
+Song: Dance Maniax (Dance_Maniax_Information)
+Song: ParaParaParadise (ParaParaParadise_Information)
+Song: MAMBO A GO GO (MAMBO_A_GO_GO_Information)
+Song: Toy'sMarch (Toy%27sMarch_Information)
+Song: DANCE 86.4 (DANCE_86.4_Information)
+Song: REFLEC BEAT (REFLEC_BEAT_Information)
+Song: DanceEvolution (DanceEvolution_Information)
+Song: BeatStream (BeatStream_Information)
+Song: MÚSECA (MUSECA_Information)
+Song: Permanent link (index.php?title=GITADORA_GALAXY_WAVE_DELTA_Full_Song_List&oldid=720959)
+Song: Page information (index.php?title=GITADORA_GALAXY_WAVE_DELTA_Full_Song_List&action=info)
+Song: Special pages (Special:SpecialPages)
+Song: Privacy policy (RemyWiki:Privacy_policy)
+Song: About RemyWiki (RemyWiki:About)
+Song: Disclaimers (RemyWiki:General_disclaimer)
+Song: Mobile view (index.php?title=GITADORA_GALAXY_WAVE_DELTA_Full_Song_List&mobileaction=toggle_view_mobile)

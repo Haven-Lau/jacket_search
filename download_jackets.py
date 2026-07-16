@@ -6,7 +6,7 @@ import threading
 import concurrent.futures
 import requests
 
-URLS_FILE = "jacket_urls.txt"
+URLS_FILE = "missing_jacket_links.txt"
 OUTPUT_DIR = "jackets"
 ERROR_LOG = "download_errors.log"
 DEFAULT_BATCH_SIZE = 100
