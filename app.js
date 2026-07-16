@@ -33,20 +33,37 @@ let sessionTopMatches = [];
 let isFrozen = false;
 let videoStream = null;
 let processingInterval = null;
+let bannedEntries = new Set();
+let enableEdgeFade = false;
 
 // DOM Elements
 const video = document.getElementById("webcam-video");
 const overlayCanvas = document.getElementById("overlay-canvas");
 const overlayCtx = overlayCanvas.getContext("2d");
 const maskSelect = document.getElementById("mask-select");
-const cameraSelect = document.getElementById("camera-select");
-const fileInput = document.getElementById("file-input");
 const matchesList = document.getElementById("matches-list");
 const loadingOverlay = document.getElementById("loading-overlay");
 const loadingText = document.getElementById("loading-text");
 const statusOverlay = document.getElementById("status-overlay");
 const clearMatchesBtn = document.getElementById("clear-matches-btn");
 const freezeBtn = document.getElementById("freeze-btn");
+const exposureContainer = document.getElementById("exposure-container");
+const exposureSlider = document.getElementById("exposure-slider");
+
+const settingsBtn = document.getElementById("settings-btn");
+const closeSettingsBtn = document.getElementById("close-settings-btn");
+const settingsModal = document.getElementById("settings-modal");
+const cameraList = document.getElementById("camera-list");
+const refreshCameraBtn = document.getElementById("refresh-camera-btn");
+
+let currentDeviceId = null;
+
+settingsBtn.addEventListener("click", () => settingsModal.classList.remove("hidden"));
+closeSettingsBtn.addEventListener("click", () => settingsModal.classList.add("hidden"));
+refreshCameraBtn.addEventListener("click", () => {
+    if (currentDeviceId) startCamera(currentDeviceId);
+    else setupCameras();
+});
 
 freezeBtn.addEventListener("click", () => {
     isFrozen = !isFrozen;
@@ -55,12 +72,22 @@ freezeBtn.addEventListener("click", () => {
 });
 
 clearMatchesBtn.addEventListener("click", () => {
+    bannedEntries.clear();
     sessionTopMatches = [];
     matchesList.innerHTML = `<div class="empty-state">
         <div class="empty-icon">⏳</div>
         <p>Waiting for clear visual feed...</p>
     </div>`;
 });
+
+const toggleFadeBtn = document.getElementById("toggle-fade-btn");
+if (toggleFadeBtn) {
+    toggleFadeBtn.addEventListener("click", () => {
+        enableEdgeFade = !enableEdgeFade;
+        toggleFadeBtn.textContent = `Fade: ${enableEdgeFade ? "ON" : "OFF"}`;
+        toggleFadeBtn.className = enableEdgeFade ? "btn primary-btn" : "btn outline-btn";
+    });
+}
 
 // Offscreen canvas for fast video frame extraction
 const offscreenCanvas = document.createElement("canvas");
@@ -82,14 +109,24 @@ function invert3x3(m) {
 }
 
 // Estimates a Similarity Transform (4-DoF: Scale, Rotation, Translation) mapping srcPts -> dstPts using linear least squares
-function estimateAffine(srcPts, dstPts) {
+function estimateAffine(srcPts, dstPts, srcAreas = null, dstAreas = null) {
     const N = srcPts.length;
     if (N === 0) return null;
     if (N < 2) {
-        // Translation only fallback for 1-dot
-        const tx = dstPts[0].x - srcPts[0].x;
-        const ty = dstPts[0].y - srcPts[0].y;
-        return { a: 1, b: 0, tx, c: 0, d: 1, ty };
+        // Translation + Scale fallback for 1-dot
+        let scale = 1;
+        if (srcAreas && dstAreas && srcAreas[0] > 0) {
+            scale = Math.sqrt(dstAreas[0] / srcAreas[0]);
+            scale = Math.max(0.5, Math.min(scale, 2.0)); // Constrain scale
+        }
+        const cx_t = srcPts[0].x;
+        const cy_t = srcPts[0].y;
+        const cx_q = dstPts[0].x;
+        const cy_q = dstPts[0].y;
+        
+        const tx = cx_q - scale * cx_t;
+        const ty = cy_q - scale * cy_t;
+        return { a: scale, b: 0, tx: tx, c: 0, d: scale, ty: ty };
     }
     
     let sumX = 0, sumY = 0, sumU = 0, sumV = 0;
@@ -370,30 +407,43 @@ async function setupCameras() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(d => d.kind === "videoinput");
         
-        cameraSelect.innerHTML = "";
+        cameraList.innerHTML = "";
         if (videoDevices.length === 0) {
-            cameraSelect.innerHTML = '<option value="">No cameras found</option>';
+            cameraList.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9rem;">No cameras found</div>';
             return;
         }
         
+        let selectedDeviceId = null;
         videoDevices.forEach((device, index) => {
-            const option = document.createElement("option");
-            option.value = device.deviceId;
-            option.text = device.label || `Camera ${index + 1}`;
             if (device.label.toLowerCase().includes("back") || device.label.toLowerCase().includes("rear")) {
-                option.selected = true;
+                selectedDeviceId = device.deviceId;
             }
-            cameraSelect.appendChild(option);
+        });
+        if (!selectedDeviceId && videoDevices.length > 0) selectedDeviceId = videoDevices[0].deviceId;
+
+        videoDevices.forEach((device, index) => {
+            const btn = document.createElement("button");
+            btn.className = device.deviceId === selectedDeviceId ? "btn primary-btn" : "btn outline-btn";
+            btn.style.width = "100%";
+            btn.style.textAlign = "left";
+            btn.textContent = device.label || `Camera ${index + 1}`;
+            btn.onclick = async () => {
+                Array.from(cameraList.children).forEach(c => c.className = "btn outline-btn");
+                btn.className = "btn primary-btn";
+                selectedDeviceId = device.deviceId;
+                await startCamera(device.deviceId);
+            };
+            cameraList.appendChild(btn);
         });
         
-        await startCamera(cameraSelect.value);
-        cameraSelect.onchange = async () => await startCamera(cameraSelect.value);
+        await startCamera(selectedDeviceId);
     } catch (err) {
         console.error("Camera detection error:", err);
     }
 }
 
 async function startCamera(deviceId) {
+    currentDeviceId = deviceId;
     if (videoStream) videoStream.getTracks().forEach(t => t.stop());
     const constraints = {
         video: deviceId ? { deviceId: { exact: deviceId }, width: 480, height: 480 } : { facingMode: "environment", width: 480, height: 480 }
@@ -402,6 +452,45 @@ async function startCamera(deviceId) {
         videoStream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = videoStream;
         video.onloadedmetadata = () => { video.play(); resizeCanvas(); };
+        
+        // Check and setup exposure controls
+        const track = videoStream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+        
+        if (capabilities.exposureMode && capabilities.exposureCompensation) {
+            exposureContainer.style.display = "flex";
+            exposureSlider.min = capabilities.exposureCompensation.min !== undefined ? capabilities.exposureCompensation.min : -3;
+            exposureSlider.max = 0; // limit to negative/0 as requested
+            exposureSlider.step = capabilities.exposureCompensation.step || 0.1;
+            
+            // Set default actual camera exposure to 60% of the range
+            const minExp = parseFloat(exposureSlider.min);
+            const maxExp = parseFloat(exposureSlider.max);
+            // 60% of usual: 100% is maxExp (0), 0% is minExp
+            const defaultExp = minExp + (maxExp - minExp) * 0.60;
+            exposureSlider.value = defaultExp;
+            
+            // Handle slider changes
+            exposureSlider.oninput = async () => {
+                try {
+                    await track.applyConstraints({
+                        advanced: [{
+                            exposureMode: "continuous",
+                            exposureCompensation: parseFloat(exposureSlider.value)
+                        }]
+                    });
+                } catch (e) {
+                    console.error("Failed to apply exposure constraint:", e);
+                }
+            };
+            
+            // Apply initial if not zero
+            if (parseFloat(exposureSlider.value) !== 0) {
+                exposureSlider.oninput();
+            }
+        } else {
+            exposureContainer.style.display = "none";
+        }
     } catch (err) {
         console.error("Error accessing camera:", err);
     }
@@ -461,54 +550,161 @@ function runMatchingPipeline() {
     const imgData = offCtx.getImageData(0, 0, 224, 224);
     const pixels = imgData.data;
     
-    let sumR = 0, sumG = 0, sumB = 0, count = 0;
-    const sample = (cx, cy) => {
-        for (let dy=0; dy<10; dy++) {
-            for (let dx=0; dx<10; dx++) {
-                const i = ((cy+dy)*224 + (cx+dx)) * 4;
-                sumR += pixels[i]; sumG += pixels[i+1]; sumB += pixels[i+2]; count++;
+    let srcPts = [], dstPts = []; // We map Template (src) -> Query (dst)
+    let srcAreas = [], dstAreas = [];
+    
+    if (activeMaskName === "1-dot") {
+        // 1-dot: Center-Biased Region Growing
+        let sumBgR = 0, sumBgG = 0, sumBgB = 0, countBg = 0;
+        const sampleBg = (cx, cy) => {
+            for (let dy=0; dy<10; dy++) {
+                for (let dx=0; dx<10; dx++) {
+                    const i = ((cy+dy)*224 + (cx+dx)) * 4;
+                    sumBgR += pixels[i]; sumBgG += pixels[i+1]; sumBgB += pixels[i+2]; countBg++;
+                }
+            }
+        };
+        sampleBg(0, 0); sampleBg(214, 0); sampleBg(0, 214); sampleBg(214, 214);
+        const bgR = sumBgR/countBg, bgG = sumBgG/countBg, bgB = sumBgB/countBg;
+        
+        let sumFgR = 0, sumFgG = 0, sumFgB = 0, countFg = 0;
+        const sampleFg = () => {
+            for (let dy=107; dy<117; dy++) {
+                for (let dx=107; dx<117; dx++) {
+                    const i = (dy*224 + dx) * 4;
+                    sumFgR += pixels[i]; sumFgG += pixels[i+1]; sumFgB += pixels[i+2]; countFg++;
+                }
+            }
+        };
+        sampleFg();
+        const fgR = sumFgR/countFg, fgG = sumFgG/countFg, fgB = sumFgB/countFg;
+        
+        const visited = new Uint8Array(224 * 224);
+        const queue = [112 * 224 + 112];
+        visited[112 * 224 + 112] = 1;
+        
+        let sumX = 0, sumY = 0, dotCount = 0;
+        let head = 0;
+        
+        while (head < queue.length) {
+            const curr = queue[head++];
+            const px = curr % 224, py = Math.floor(curr / 224);
+            sumX += px; sumY += py; dotCount++;
+            
+            const neighbors = [curr + 1, curr - 1, curr + 224, curr - 224];
+            for (const n of neighbors) {
+                if (n >= 0 && n < 224 * 224 && !visited[n]) {
+                    const r = pixels[n*4], g = pixels[n*4+1], b = pixels[n*4+2];
+                    const distFg = Math.sqrt((r-fgR)**2 + (g-fgG)**2 + (b-fgB)**2);
+                    const distBg = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2);
+                    
+                    if (distFg < distBg) {
+                        visited[n] = 1;
+                        queue.push(n);
+                    } else {
+                        visited[n] = 2; // boundary
+                    }
+                }
             }
         }
-    };
-    sample(0, 0); sample(214, 0); sample(0, 214); sample(214, 214);
-    const bgR = sumR/count, bgG = sumG/count, bgB = sumB/count;
-    
-    // 2. Segment dots (Dist > 70)
-    const binaryMask = new Uint8Array(224 * 224);
-    for (let i = 0; i < 224 * 224; i++) {
-        const r = pixels[i*4], g = pixels[i*4+1], b = pixels[i*4+2];
-        const dist = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2);
-        binaryMask[i] = dist > 70 ? 1 : 0;
-    }
-    
-    // 3. Find Query Centroids
-    const queryDots = getDotProperties(binaryMask, 224, 224);
-    if (queryDots.length < templateDots.length) {
-        showStatus(`Align all ${templateDots.length} dots...`);
-        return;
-    }
-    statusOverlay.classList.add("hidden");
-    
-    // 3. Find top N largest blobs, up to 5
-    queryDots.sort((a, b) => b.area - a.area);
-    const topQueryDots = queryDots.slice(0, Math.max(templateDots.length, 5));
-    
-    // Map each template dot to the spatially closest query dot
-    const srcPts = [], dstPts = []; // We map Template (src) -> Query (dst)
-    for (const td of templateDots) {
-        let minDist = Infinity, closestQ = null;
-        for (const qd of topQueryDots) {
-            const d = Math.hypot(qd.cx - td.cx, qd.cy - td.cy);
-            if (d < minDist) { minDist = d; closestQ = qd; }
+        
+        if (dotCount > 10) {
+            const cx = sumX / dotCount;
+            const cy = sumY / dotCount;
+            srcPts.push({x: templateDots[0].cx, y: templateDots[0].cy});
+            dstPts.push({x: cx, y: cy});
+            srcAreas.push(templateDots[0].area);
+            dstAreas.push(dotCount);
+            statusOverlay.classList.add("hidden");
+            
+            // Draw real-time outline
+            drawOverlay();
+            const w = overlayCanvas.width, h = overlayCanvas.height;
+            const drawBoxSize = Math.min(w, h);
+            const bx = (w - drawBoxSize) / 2, by = (h - drawBoxSize) / 2;
+            const drawX = (cx / 224) * drawBoxSize + bx;
+            const drawY = (cy / 224) * drawBoxSize + by;
+            const drawR = (Math.sqrt(dotCount / Math.PI) / 224) * drawBoxSize;
+            
+            overlayCtx.beginPath();
+            overlayCtx.arc(drawX, drawY, drawR, 0, 2 * Math.PI);
+            overlayCtx.strokeStyle = "rgba(0, 255, 0, 0.8)";
+            overlayCtx.lineWidth = 2;
+            overlayCtx.stroke();
+            
+        } else {
+            drawOverlay();
+            showStatus(`Align the dot...`);
+            return;
         }
-        if (closestQ) {
-            srcPts.push({x: td.cx, y: td.cy});
-            dstPts.push({x: closestQ.cx, y: closestQ.cy});
+    } else {
+        // Multi-dot: Original Logic
+        let sumR = 0, sumG = 0, sumB = 0, count = 0;
+        const sample = (cx, cy) => {
+            for (let dy=0; dy<10; dy++) {
+                for (let dx=0; dx<10; dx++) {
+                    const i = ((cy+dy)*224 + (cx+dx)) * 4;
+                    sumR += pixels[i]; sumG += pixels[i+1]; sumB += pixels[i+2]; count++;
+                }
+            }
+        };
+        sample(0, 0); sample(214, 0); sample(0, 214); sample(214, 214);
+        const bgR = sumR/count, bgG = sumG/count, bgB = sumB/count;
+        
+        const binaryMask = new Uint8Array(224 * 224);
+        for (let i = 0; i < 224 * 224; i++) {
+            const r = pixels[i*4], g = pixels[i*4+1], b = pixels[i*4+2];
+            const dist = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2);
+            binaryMask[i] = dist > 70 ? 1 : 0;
+        }
+        
+        const queryDots = getDotProperties(binaryMask, 224, 224);
+        if (queryDots.length < templateDots.length) {
+            drawOverlay();
+            showStatus(`Align all ${templateDots.length} dots...`);
+            return;
+        }
+        statusOverlay.classList.add("hidden");
+        
+        queryDots.sort((a, b) => b.area - a.area);
+        const topQueryDots = queryDots.slice(0, Math.max(templateDots.length, 5));
+        
+        for (const td of templateDots) {
+            let minDist = Infinity, closestQ = null;
+            for (const qd of topQueryDots) {
+                const d = Math.hypot(qd.cx - td.cx, qd.cy - td.cy);
+                if (d < minDist) { minDist = d; closestQ = qd; }
+            }
+            if (closestQ) {
+                srcPts.push({x: td.cx, y: td.cy});
+                dstPts.push({x: closestQ.cx, y: closestQ.cy});
+                srcAreas.push(td.area);
+                dstAreas.push(closestQ.area);
+            }
+        }
+        
+        // Draw real-time outline for multi-dot
+        drawOverlay();
+        const w = overlayCanvas.width, h = overlayCanvas.height;
+        const drawBoxSize = Math.min(w, h);
+        const bx = (w - drawBoxSize) / 2, by = (h - drawBoxSize) / 2;
+        
+        for (let i = 0; i < dstPts.length; i++) {
+            const pt = dstPts[i];
+            const drawX = (pt.x / 224) * drawBoxSize + bx;
+            const drawY = (pt.y / 224) * drawBoxSize + by;
+            const drawR = (Math.sqrt(dstAreas[i] / Math.PI) / 224) * drawBoxSize;
+            
+            overlayCtx.beginPath();
+            overlayCtx.arc(drawX, drawY, drawR, 0, 2 * Math.PI);
+            overlayCtx.strokeStyle = "rgba(0, 255, 0, 0.8)";
+            overlayCtx.lineWidth = 2;
+            overlayCtx.stroke();
         }
     }
     
     // 4. Affine Alignment (Warp to perfectly align with templates)
-    const M = estimateAffine(srcPts, dstPts);
+    const M = estimateAffine(srcPts, dstPts, srcAreas, dstAreas);
     if (!M) return;
     
     // warpAffineNearest maps Template -> Query to sample pixels properly
@@ -556,15 +752,50 @@ function runMatchingPipeline() {
     }
     dqCtx.putImageData(queryGridData, 0, 0);
     
-    // 6. Extract pixels and normalize query
+    // 6. Extract pixels and apply edge fading for UI only
     const qR = [], qG = [], qB = [];
-    for (let i = 0; i < GRID_W * GRID_H; i++) {
-        if (config.eroded80x120[i]) {
-            qR.push(queryGridData.data[i*4]);
-            qG.push(queryGridData.data[i*4+1]);
-            qB.push(queryGridData.data[i*4+2]);
+    
+    // Collect pixels
+    for (let y = 0; y < GRID_H; y++) {
+        for (let x = 0; x < GRID_W; x++) {
+            const i = y * GRID_W + x;
+            if (config.eroded80x120[i]) {
+                const origR = queryGridData.data[i*4];
+                const origG = queryGridData.data[i*4+1];
+                const origB = queryGridData.data[i*4+2];
+                
+                // Keep raw pixels for NCC so we don't break the dot product with the database
+                qR.push(origR);
+                qG.push(origG);
+                qB.push(origB);
+                
+                // Determine edge proximity for visual fading on the UI canvas
+                let maskSum = 0, maskCount = 0;
+                for (let dy = -3; dy <= 3; dy++) {
+                    for (let dx = -3; dx <= 3; dx++) {
+                        const nx = x + dx, ny = y + dy;
+                        if (nx >= 0 && nx < GRID_W && ny >= 0 && ny < GRID_H) {
+                            maskSum += config.eroded80x120[ny * GRID_W + nx] ? 1 : 0;
+                            maskCount++;
+                        }
+                    }
+                }
+                const weight = maskSum / maskCount;
+                
+                // Visual fade to black at the edges
+                if (enableEdgeFade) {
+                    queryGridData.data[i*4] = origR * weight;
+                    queryGridData.data[i*4+1] = origG * weight;
+                    queryGridData.data[i*4+2] = origB * weight;
+                } else {
+                    queryGridData.data[i*4] = origR;
+                    queryGridData.data[i*4+1] = origG;
+                    queryGridData.data[i*4+2] = origB;
+                }
+            }
         }
     }
+    dqCtx.putImageData(queryGridData, 0, 0);
     
     const normalize = (channel) => {
         const mean = channel.reduce((a, b) => a + b, 0) / channel.length;
@@ -575,6 +806,7 @@ function runMatchingPipeline() {
     };
     
     const qRNorm = normalize(qR), qGNorm = normalize(qG), qBNorm = normalize(qB);
+
     
     // 7. Compute True NCC (Dot Product of normalized vectors)
     const numJackets = jacketNames.length;
@@ -601,7 +833,8 @@ function runMatchingPipeline() {
     
     let updated = false;
     for (const match of topCurrent) {
-        if (match.score < 0.6) continue; // Filter bad matches
+        if (match.score < 0.45) continue; // Filter bad matches
+        if (bannedEntries.has(match.name)) continue;
         const existing = sessionTopMatches.find(m => m.name === match.name);
         if (existing) {
             if (match.score > existing.score) {
@@ -645,11 +878,14 @@ function renderMatches(topMatches) {
         matchItem.innerHTML = `
             <div class="match-header" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 1rem;">
                 <div class="match-name" title="${match.name}" style="flex: 1;">${match.name}</div>
-                <div class="score-container" style="min-width: 100px; flex-shrink: 0; text-align: right;">
-                    <div class="score-text" style="font-weight: bold; margin-bottom: 4px;">${match.score.toFixed(4)}</div>
-                    <div class="score-bar-bg">
-                        <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
+                <div class="score-container" style="min-width: 100px; flex-shrink: 0; text-align: right; display: flex; align-items: center; gap: 8px;">
+                    <div style="flex: 1;">
+                        <div class="score-text" style="font-weight: bold; margin-bottom: 4px;">${match.score.toFixed(4)}</div>
+                        <div class="score-bar-bg">
+                            <div class="score-bar-fill" style="width: ${scorePercentage}%"></div>
+                        </div>
                     </div>
+                    <button class="ban-btn" data-name="${match.name}" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0;" title="Temporarily ban this match">✖</button>
                 </div>
             </div>
             <div class="match-content" style="display: flex; justify-content: flex-end; width: 100%; margin-top: 0.5rem; gap: 0; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 4px; overflow: hidden;">
@@ -703,28 +939,20 @@ function renderMatches(topMatches) {
         
         matchesList.appendChild(matchItem);
     });
+    
+    // Add event listeners for ban buttons
+    const banBtns = matchesList.querySelectorAll('.ban-btn');
+    banBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const name = e.target.getAttribute('data-name');
+            bannedEntries.add(name);
+            sessionTopMatches = sessionTopMatches.filter(m => m.name !== name);
+            renderMatches(sessionTopMatches);
+        });
+    });
 }
 
-// 5. Test Image Upload
-function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    isLiveFeed = false; // Pause webcam
-    showStatus("Processing uploaded image...");
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-            offCtx.clearRect(0, 0, 224, 224);
-            offCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, 224, 224);
-            runMatchingPipeline(); // Trigger once on upload
-        };
-        img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-}
+// 5. Test Image Upload logic removed
 
 const maskButtons = document.querySelectorAll("#mask-buttons button");
 
@@ -741,20 +969,11 @@ maskButtons.forEach(btn => {
     });
 });
 
-cameraSelect.addEventListener("change", (e) => { drawOverlay();
-    showStatus("Waiting for query feed...");
-});
-
-fileInput.addEventListener("change", handleFileUpload);
 window.addEventListener("resize", resizeCanvas);
 
 async function init() {
     await initDatabase();
     await setupCameras();
-    
-    cameraSelect.addEventListener("change", () => {
-        isLiveFeed = true; // Resume webcam
-    });
     
     // Run at 8 FPS
     processingInterval = setInterval(processQueryFrame, 125);

@@ -23,17 +23,8 @@
                     </div>
                     
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <div style="position: relative; display: inline-block;">
-                            <button class="btn outline-btn" style="padding: 0.3rem 0.5rem; font-size: 1.1rem; pointer-events: none; border: 1px solid var(--border);">📷</button>
-                            <select id="camera-select" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
-                                <option value="">Cameras...</option>
-                            </select>
-                        </div>
-                        
-                        <div class="upload-btn-wrapper" style="flex-shrink: 0; margin: 0; position: relative;">
-                            <button class="btn primary-btn" style="padding: 0.3rem 0.5rem; font-size: 1.1rem; pointer-events: none;">📁</button>
-                            <input type="file" id="file-input" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
-                        </div>
+                        <button id="refresh-camera-btn" class="btn outline-btn" style="padding: 0.3rem 0.5rem; font-size: 1.1rem; border: 1px solid var(--border);" title="Refresh Camera">🔄</button>
+                        <button id="settings-btn" class="btn outline-btn" style="padding: 0.3rem 0.5rem; font-size: 1.1rem; border: 1px solid var(--border);" title="Settings">⚙️</button>
                     </div>
                 </div>
                 <div class="video-wrapper">
@@ -44,6 +35,10 @@
                         <p id="loading-text">Initializing...</p>
                     </div>
                     <div id="status-overlay" class="overlay-text hidden"></div>
+                </div>
+                <div id="exposure-container" style="display: none; justify-content: center; align-items: center; padding: 0.5rem; gap: 0.5rem; background: var(--bg-secondary); border-top: 1px solid var(--border); border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius);">
+                    <span style="font-size: 1.2rem;" title="Exposure Compensation">💡</span>
+                    <input type="range" id="exposure-slider" min="-3" max="0" step="0.1" value="0" style="flex-grow: 1; max-width: 200px;">
                 </div>
             </div>
 
@@ -63,6 +58,28 @@
                 </div>
             </div>
         </main>
+
+        <div id="settings-modal" class="overlay hidden" style="z-index: 100;">
+            <div class="panel" style="width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="font-family: 'Outfit', sans-serif; font-weight: 700;">Settings</h2>
+                    <button id="close-settings-btn" class="btn outline-btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; min-width: auto;">Close</button>
+                </div>
+                
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Fade Fringes</label>
+                    <div style="margin-top: 0.25rem;">
+                        <button id="toggle-fade-btn" class="btn outline-btn" style="width: 100%;">Fade: OFF</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Camera Setup</label>
+                    <div id="camera-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem;">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="app.js"></script>
 </body>
