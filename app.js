@@ -36,6 +36,7 @@ let videoStream = null;
 let processingInterval = null;
 let bannedEntries = new Set();
 let enableEdgeFade = false;
+let enableColorFilter = true;
 
 // DOM Elements
 const video = document.getElementById("webcam-video");
@@ -90,6 +91,15 @@ if (toggleFadeBtn) {
     });
 }
 
+const toggleColorFilterBtn = document.getElementById("toggle-color-filter-btn");
+if (toggleColorFilterBtn) {
+    toggleColorFilterBtn.addEventListener("click", () => {
+        enableColorFilter = !enableColorFilter;
+        toggleColorFilterBtn.textContent = `Filter: ${enableColorFilter ? "ON" : "OFF"}`;
+        toggleColorFilterBtn.className = enableColorFilter ? "btn primary-btn" : "btn outline-btn";
+    });
+}
+
 // Offscreen canvas for fast video frame extraction
 const offscreenCanvas = document.createElement("canvas");
 offscreenCanvas.width = 224;
@@ -97,6 +107,25 @@ offscreenCanvas.height = 224;
 const offCtx = offscreenCanvas.getContext("2d", { willReadFrequently: true });
 
 // Math Utilities
+function rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, v = max;
+    const d = max - min;
+    s = max === 0 ? 0 : d / max;
+    if (max === min) {
+        h = 0; 
+    } else {
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h * 360, s, v]; 
+}
+
 function invert3x3(m) {
     const det = m[0][0]*(m[1][1]*m[2][2] - m[1][2]*m[2][1])
               - m[0][1]*(m[1][0]*m[2][2] - m[1][2]*m[2][0])
@@ -574,15 +603,14 @@ function runMatchingPipeline() {
     if (activeMaskName === "1-dot") {
         // 1-dot: Center-Biased Region Growing
         let sumBgR = 0, sumBgG = 0, sumBgB = 0, countBg = 0;
-        const sampleBg = (cx, cy) => {
-            for (let dy=0; dy<10; dy++) {
-                for (let dx=0; dx<10; dx++) {
-                    const i = ((cy+dy)*224 + (cx+dx)) * 4;
+        for (let y = 0; y < 224; y++) {
+            for (let x = 0; x < 224; x++) {
+                if (x < 5 || x >= 219 || y < 5 || y >= 219) { // 5px border
+                    const i = (y*224 + x) * 4;
                     sumBgR += pixels[i]; sumBgG += pixels[i+1]; sumBgB += pixels[i+2]; countBg++;
                 }
             }
-        };
-        sampleBg(0, 0); sampleBg(214, 0); sampleBg(0, 214); sampleBg(214, 214);
+        }
         const bgR = sumBgR/countBg, bgG = sumBgG/countBg, bgB = sumBgB/countBg;
         
         let sumFgR = 0, sumFgG = 0, sumFgB = 0, countFg = 0;
@@ -604,6 +632,10 @@ function runMatchingPipeline() {
         let sumX = 0, sumY = 0, dotCount = 0;
         let head = 0;
         
+        const getBlueBalance = (r, g, b) => b - (r + g) / 2;
+        const bgBlue = getBlueBalance(bgR, bgG, bgB);
+        const fgBlue = getBlueBalance(fgR, fgG, fgB);
+        
         while (head < queue.length) {
             const curr = queue[head++];
             const px = curr % 224, py = Math.floor(curr / 224);
@@ -613,8 +645,9 @@ function runMatchingPipeline() {
             for (const n of neighbors) {
                 if (n >= 0 && n < 224 * 224 && !visited[n]) {
                     const r = pixels[n*4], g = pixels[n*4+1], b = pixels[n*4+2];
-                    const distFg = Math.sqrt((r-fgR)**2 + (g-fgG)**2 + (b-fgB)**2);
-                    const distBg = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2);
+                    const pBlue = getBlueBalance(r, g, b);
+                    const distFg = Math.sqrt((r-fgR)**2 + (g-fgG)**2 + (b-fgB)**2) + Math.abs(pBlue - fgBlue) * 1.5;
+                    const distBg = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2) + Math.abs(pBlue - bgBlue) * 1.5;
                     
                     if (distFg < distBg) {
                         visited[n] = 1;
@@ -630,28 +663,17 @@ function runMatchingPipeline() {
         const scale = Math.sqrt(dotCount / templateArea);
         
         if (dotCount > 10 && scale >= 0.4 && scale <= 2.5) {
-            const cx = sumX / dotCount;
-            const cy = sumY / dotCount;
+            const centroidX = sumX / dotCount;
+            const centroidY = sumY / dotCount;
+            // Heavily weight the user's aim (112,112) as ground truth
+            const cx = 112 * 0.8 + centroidX * 0.2;
+            const cy = 112 * 0.8 + centroidY * 0.2;
+            
             srcPts.push({x: templateDots[0].cx, y: templateDots[0].cy});
             dstPts.push({x: cx, y: cy});
             srcAreas.push(templateDots[0].area);
             dstAreas.push(dotCount);
             statusOverlay.classList.add("hidden");
-            
-            // Draw real-time outline
-            drawOverlay();
-            const w = overlayCanvas.width, h = overlayCanvas.height;
-            const drawBoxSize = Math.min(w, h);
-            const bx = (w - drawBoxSize) / 2, by = (h - drawBoxSize) / 2;
-            const drawX = (cx / 224) * drawBoxSize + bx;
-            const drawY = (cy / 224) * drawBoxSize + by;
-            const drawR = (Math.sqrt(dotCount / Math.PI) / 224) * drawBoxSize;
-            
-            overlayCtx.beginPath();
-            overlayCtx.arc(drawX, drawY, drawR, 0, 2 * Math.PI);
-            overlayCtx.strokeStyle = "rgba(0, 255, 0, 0.8)";
-            overlayCtx.lineWidth = 2;
-            overlayCtx.stroke();
             
         } else {
             drawOverlay();
@@ -661,80 +683,122 @@ function runMatchingPipeline() {
     } else {
         // Multi-dot: Original Logic
         let sumR = 0, sumG = 0, sumB = 0, count = 0;
-        const sample = (cx, cy) => {
-            for (let dy=0; dy<10; dy++) {
-                for (let dx=0; dx<10; dx++) {
-                    const i = ((cy+dy)*224 + (cx+dx)) * 4;
+        for (let y = 0; y < 224; y++) {
+            for (let x = 0; x < 224; x++) {
+                if (x < 5 || x >= 219 || y < 5 || y >= 219) { // 5px border
+                    const i = (y*224 + x) * 4;
                     sumR += pixels[i]; sumG += pixels[i+1]; sumB += pixels[i+2]; count++;
                 }
             }
-        };
-        sample(0, 0); sample(214, 0); sample(0, 214); sample(214, 214);
+        }
         const bgR = sumR/count, bgG = sumG/count, bgB = sumB/count;
         
-        const binaryMask = new Uint8Array(224 * 224);
-        for (let i = 0; i < 224 * 224; i++) {
-            const r = pixels[i*4], g = pixels[i*4+1], b = pixels[i*4+2];
-            const dist = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2);
-            binaryMask[i] = dist > 70 ? 1 : 0;
+        const getBlueBalance = (r, g, b) => b - (r + g) / 2;
+        const bgBlue = getBlueBalance(bgR, bgG, bgB);
+        
+        for (const td of templateDots) {
+            const tcx = Math.round(td.cx);
+            const tcy = Math.round(td.cy);
+            
+            // Sample foreground at this dot's visual hole
+            let sumFgR = 0, sumFgG = 0, sumFgB = 0, countFg = 0;
+            for (let dy = -4; dy <= 4; dy++) {
+                for (let dx = -4; dx <= 4; dx++) {
+                    const nx = tcx + dx, ny = tcy + dy;
+                    if (nx >= 0 && nx < 224 && ny >= 0 && ny < 224) {
+                        const i = (ny*224 + nx) * 4;
+                        sumFgR += pixels[i]; sumFgG += pixels[i+1]; sumFgB += pixels[i+2]; countFg++;
+                    }
+                }
+            }
+            if (countFg === 0) continue;
+            
+            const fgR = sumFgR/countFg, fgG = sumFgG/countFg, fgB = sumFgB/countFg;
+            const fgBlue = getBlueBalance(fgR, fgG, fgB);
+            
+            const visited = new Uint8Array(224 * 224);
+            const queue = [tcy * 224 + tcx];
+            visited[tcy * 224 + tcx] = 1;
+            
+            let sumX = 0, sumY = 0, dotCount = 0;
+            let head = 0;
+            const searchRadius = 35; // Bound bleeding to a local box
+            
+            while (head < queue.length) {
+                const curr = queue[head++];
+                const px = curr % 224, py = Math.floor(curr / 224);
+                sumX += px; sumY += py; dotCount++;
+                
+                const neighbors = [curr + 1, curr - 1, curr + 224, curr - 224];
+                for (const n of neighbors) {
+                    if (n >= 0 && n < 224 * 224 && !visited[n]) {
+                        const nx = n % 224, ny = Math.floor(n / 224);
+                        if (Math.abs(nx - tcx) > searchRadius || Math.abs(ny - tcy) > searchRadius) continue;
+                        
+                        const r = pixels[n*4], g = pixels[n*4+1], b = pixels[n*4+2];
+                        const pBlue = getBlueBalance(r, g, b);
+                        const distFg = Math.sqrt((r-fgR)**2 + (g-fgG)**2 + (b-fgB)**2) + Math.abs(pBlue - fgBlue) * 1.5;
+                        const distBg = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2) + Math.abs(pBlue - bgBlue) * 1.5;
+                        
+                        if (distFg < distBg) {
+                            visited[n] = 1;
+                            queue.push(n);
+                        }
+                    }
+                }
+            }
+            
+            const scale = Math.sqrt(dotCount / td.area);
+            if (dotCount > 5 && scale >= 0.4 && scale <= 2.5) {
+                const cx = sumX / dotCount;
+                const cy = sumY / dotCount;
+                // Pure centroids, NO artificial weighting to visual holes
+                
+                srcPts.push({x: td.cx, y: td.cy});
+                dstPts.push({x: cx, y: cy});
+                srcAreas.push(td.area);
+                dstAreas.push(dotCount);
+            }
         }
         
-        let queryDots = getDotProperties(binaryMask, 224, 224);
-        
-        // Filter by size: 40% to 250% scale relative to average template dot size
-        const avgTemplateArea = templateDots.reduce((sum, td) => sum + td.area, 0) / templateDots.length;
-        queryDots = queryDots.filter(qd => {
-            const scale = Math.sqrt(qd.area / avgTemplateArea);
-            return scale >= 0.4 && scale <= 2.5;
-        });
-        
-        if (queryDots.length < templateDots.length) {
+        if (dstPts.length < templateDots.length) {
             drawOverlay();
             showStatus(`Align all ${templateDots.length} dots...`);
             return;
         }
         statusOverlay.classList.add("hidden");
         
-        queryDots.sort((a, b) => b.area - a.area);
-        const topQueryDots = queryDots.slice(0, Math.max(templateDots.length, 5));
-        
-        for (const td of templateDots) {
-            let minDist = Infinity, closestQ = null;
-            for (const qd of topQueryDots) {
-                const d = Math.hypot(qd.cx - td.cx, qd.cy - td.cy);
-                if (d < minDist) { minDist = d; closestQ = qd; }
-            }
-            if (closestQ) {
-                srcPts.push({x: td.cx, y: td.cy});
-                dstPts.push({x: closestQ.cx, y: closestQ.cy});
-                srcAreas.push(td.area);
-                dstAreas.push(closestQ.area);
-            }
-        }
-        
-        // Draw real-time outline for multi-dot
-        drawOverlay();
-        const w = overlayCanvas.width, h = overlayCanvas.height;
-        const drawBoxSize = Math.min(w, h);
-        const bx = (w - drawBoxSize) / 2, by = (h - drawBoxSize) / 2;
-        
-        for (let i = 0; i < dstPts.length; i++) {
-            const pt = dstPts[i];
-            const drawX = (pt.x / 224) * drawBoxSize + bx;
-            const drawY = (pt.y / 224) * drawBoxSize + by;
-            const drawR = (Math.sqrt(dstAreas[i] / Math.PI) / 224) * drawBoxSize;
-            
-            overlayCtx.beginPath();
-            overlayCtx.arc(drawX, drawY, drawR, 0, 2 * Math.PI);
-            overlayCtx.strokeStyle = "rgba(0, 255, 0, 0.8)";
-            overlayCtx.lineWidth = 2;
-            overlayCtx.stroke();
+        // Lock circle sizes to average
+        const avgArea = dstAreas.reduce((a, b) => a + b, 0) / dstAreas.length;
+        for (let i = 0; i < dstAreas.length; i++) {
+            dstAreas[i] = avgArea;
         }
     }
     
     // 4. Affine Alignment (Warp to perfectly align with templates)
     const M = estimateAffine(srcPts, dstPts, srcAreas, dstAreas);
     if (!M) return;
+    
+    // Draw static mask and dynamic green circles
+    drawOverlay();
+    
+    const w = overlayCanvas.width, h = overlayCanvas.height;
+    const boxSize = Math.min(w, h);
+    const bx = (w - boxSize) / 2, by = (h - boxSize) / 2;
+    
+    // Draw green circles on centroids
+    for (let i = 0; i < dstPts.length; i++) {
+        const pt = dstPts[i];
+        const drawX = (pt.x / 224) * boxSize + bx;
+        const drawY = (pt.y / 224) * boxSize + by;
+        const drawR = (Math.sqrt(dstAreas[i] / Math.PI) / 224) * boxSize;
+        
+        overlayCtx.beginPath();
+        overlayCtx.arc(drawX, drawY, drawR, 0, 2 * Math.PI);
+        overlayCtx.strokeStyle = "rgba(0, 255, 0, 0.8)";
+        overlayCtx.lineWidth = 2;
+        overlayCtx.stroke();
+    }
     
     // warpAffineNearest maps Template -> Query to sample pixels properly
     const warpedData = warpAffineNearest(imgData, 224, 224, M);
@@ -858,7 +922,46 @@ function runMatchingPipeline() {
     }
     
     similarityResults.sort((a, b) => b.score - a.score);
-    const topCurrent = similarityResults.slice(0, 5);
+    let topCurrent = similarityResults.slice(0, 15);
+    
+    if (enableColorFilter) {
+        const rCtxTemp = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+        rCtxTemp.canvas.width = GRID_W; rCtxTemp.canvas.height = GRID_H;
+        const cols = Math.floor(spriteCanvas.width / GRID_W);
+        
+        for (let i = 0; i < topCurrent.length; i++) {
+            const match = topCurrent[i];
+            const sx = (match.index % cols) * GRID_W;
+            const sy = Math.floor(match.index / cols) * GRID_H;
+            rCtxTemp.drawImage(spriteCanvas, sx, sy, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
+            const refData = rCtxTemp.getImageData(0, 0, GRID_W, GRID_H).data;
+            
+            let hueDistSum = 0, satDistSum = 0, colorPixelCount = 0;
+            for (let p = 0; p < GRID_W * GRID_H; p++) {
+                if (config.eroded80x120[p]) {
+                    const qHsv = rgbToHsv(qR[colorPixelCount], qG[colorPixelCount], qB[colorPixelCount]);
+                    const rHsv = rgbToHsv(refData[p*4], refData[p*4+1], refData[p*4+2]);
+                    
+                    const hueDiff = Math.abs(qHsv[0] - rHsv[0]);
+                    const hueDist = Math.min(hueDiff, 360 - hueDiff) / 180.0;
+                    const satDist = Math.abs(qHsv[1] - rHsv[1]);
+                    
+                    hueDistSum += hueDist;
+                    satDistSum += satDist;
+                    colorPixelCount++;
+                }
+            }
+            
+            if (colorPixelCount > 0) {
+                const avgColorDist = (hueDistSum + satDistSum) / colorPixelCount;
+                match.score = match.score - (avgColorDist * 0.2);
+            }
+        }
+        
+        topCurrent.sort((a, b) => b.score - a.score);
+    }
+    
+    topCurrent = topCurrent.slice(0, 5);
     
     let updated = false;
     for (const match of topCurrent) {
@@ -881,8 +984,8 @@ function runMatchingPipeline() {
     
     if (updated || (!isLiveFeed && sessionTopMatches.length === 0)) {
         sessionTopMatches.sort((a, b) => b.score - a.score);
-        sessionTopMatches = sessionTopMatches.slice(0, 3);
-        renderMatches(sessionTopMatches);
+        sessionTopMatches = sessionTopMatches.slice(0, 20);
+        renderMatches(sessionTopMatches.slice(0, 5));
     }
 }
 
@@ -1001,7 +1104,7 @@ function renderMatches(topMatches) {
             const name = e.target.getAttribute('data-name');
             bannedEntries.add(name);
             sessionTopMatches = sessionTopMatches.filter(m => m.name !== name);
-            renderMatches(sessionTopMatches);
+            renderMatches(sessionTopMatches.slice(0, 5));
         });
     });
 }

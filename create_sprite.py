@@ -41,7 +41,7 @@ def build_patch_grid(img_224, patch_size=40, radius=17.5):
     grid[0:40, 40:80] = patches[1]
     grid[40:80, 0:40] = patches[2]
     grid[40:80, 40:80] = patches[3]
-    grid[80:120, 20:60] = patches[4]
+    grid[80:120, 0:40] = patches[4]
     
     return grid
 
