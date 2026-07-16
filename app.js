@@ -392,19 +392,24 @@ async function prepareMaskConfigs(sCtx) {
             }
         }
         
-        // Generate overlay bitmap from eroded224 for intuitive camera alignment
-        const erodedImgData = new ImageData(224, 224);
-        for (let i = 0; i < 224 * 224; i++) {
-            if (eroded224[i]) {
-                erodedImgData.data[i*4] = 16;     // R
-                erodedImgData.data[i*4+1] = 185;  // G
-                erodedImgData.data[i*4+2] = 129;  // B
-                erodedImgData.data[i*4+3] = 150;  // A
-            }
-        }
-        const erodedBitmap = await createImageBitmap(erodedImgData);
+        // Generate a high-quality punch-hole mask for the overlay using the original mask image
+        const oCanvas = document.createElement("canvas");
+        oCanvas.width = maskImg.width;
+        oCanvas.height = maskImg.height;
+        const oCtx = oCanvas.getContext("2d");
+        oCtx.drawImage(maskImg, 0, 0);
         
-        maskConfigs[name] = { templateDots, slotIndices: tdSlotIndices, eroded80x120, pixelCount, dbNorms, erodedBitmap };
+        const origData = oCtx.getImageData(0, 0, maskImg.width, maskImg.height);
+        const punchImgData = new ImageData(maskImg.width, maskImg.height);
+        for (let i = 0; i < maskImg.width * maskImg.height; i++) {
+            punchImgData.data[i*4] = 255;
+            punchImgData.data[i*4+1] = 255;
+            punchImgData.data[i*4+2] = 255;
+            punchImgData.data[i*4+3] = Math.min(255, origData.data[i*4] * 255 / 238); // Scale so 238 becomes fully transparent hole
+        }
+        const punchHoleBitmap = await createImageBitmap(punchImgData);
+        
+        maskConfigs[name] = { templateDots, slotIndices: tdSlotIndices, eroded80x120, pixelCount, dbNorms, punchHoleBitmap };
     }
 }
 
@@ -514,20 +519,26 @@ function drawOverlay() {
     const w = overlayCanvas.width, h = overlayCanvas.height;
     overlayCtx.clearRect(0, 0, w, h);
     
+    // Fill the entire canvas with semi-transparent black
+    overlayCtx.fillStyle = "rgba(0, 0, 0, 0.65)";
+    overlayCtx.fillRect(0, 0, w, h);
+    
     const boxSize = Math.min(w, h);
     const bx = (w - boxSize) / 2, by = (h - boxSize) / 2;
-    
-    overlayCtx.strokeStyle = "rgba(99, 102, 241, 0.5)";
-    overlayCtx.lineWidth = 2;
-    overlayCtx.strokeRect(bx, by, boxSize, boxSize);
     
     if (!maskConfigs[activeMaskName]) return;
     const config = maskConfigs[activeMaskName];
     
-    // Draw the actual eroded mask preview instead of circles
-    if (config.erodedBitmap) {
-        overlayCtx.drawImage(config.erodedBitmap, bx, by, boxSize, boxSize);
+    // Punch out holes for the dots
+    if (config.punchHoleBitmap) {
+        overlayCtx.globalCompositeOperation = "destination-out";
+        overlayCtx.drawImage(config.punchHoleBitmap, bx, by, boxSize, boxSize);
+        overlayCtx.globalCompositeOperation = "source-over"; // restore default
     }
+
+    overlayCtx.strokeStyle = "rgba(99, 102, 241, 0.5)";
+    overlayCtx.lineWidth = 2;
+    overlayCtx.strokeRect(bx, by, boxSize, boxSize);
 }
 
 // 4. Query Processing & NCC Match
@@ -618,7 +629,7 @@ function runMatchingPipeline() {
         const templateArea = templateDots[0].area;
         const scale = Math.sqrt(dotCount / templateArea);
         
-        if (dotCount > 10 && scale >= 0.75 && scale <= 1.5) {
+        if (dotCount > 10 && scale >= 0.4 && scale <= 2.5) {
             const cx = sumX / dotCount;
             const cy = sumY / dotCount;
             srcPts.push({x: templateDots[0].cx, y: templateDots[0].cy});
@@ -670,11 +681,11 @@ function runMatchingPipeline() {
         
         let queryDots = getDotProperties(binaryMask, 224, 224);
         
-        // Filter by size: 75% to 150% scale relative to average template dot size
+        // Filter by size: 40% to 250% scale relative to average template dot size
         const avgTemplateArea = templateDots.reduce((sum, td) => sum + td.area, 0) / templateDots.length;
         queryDots = queryDots.filter(qd => {
             const scale = Math.sqrt(qd.area / avgTemplateArea);
-            return scale >= 0.75 && scale <= 1.5;
+            return scale >= 0.4 && scale <= 2.5;
         });
         
         if (queryDots.length < templateDots.length) {
