@@ -146,7 +146,8 @@ function estimateAffine(srcPts, dstPts, srcAreas = null, dstAreas = null) {
         // Translation + Scale fallback for 1-dot
         let scale = 1;
         if (srcAreas && dstAreas && srcAreas[0] > 0) {
-            scale = Math.sqrt(dstAreas[0] / srcAreas[0]);
+            const rawScale = Math.sqrt(dstAreas[0] / srcAreas[0]);
+            scale = rawScale * 0.4 + 1.0 * 0.6; // Rely on user zoom 60%
             scale = Math.max(0.75, Math.min(scale, 1.5)); // Constrain scale to 75%-150%
         }
         const cx_t = srcPts[0].x;
@@ -653,7 +654,7 @@ function runMatchingPipeline() {
                     const distFg = Math.sqrt((r-fgR)**2 + (g-fgG)**2 + (b-fgB)**2) + Math.abs(pBlue - fgBlue) * 1.5;
                     const distBg = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2) + Math.abs(pBlue - bgBlue) * 1.5;
                     
-                    if (distFg < distBg) {
+                    if (distFg * 1.15 < distBg) {
                         visited[n] = 1;
                         queue.push(n);
                     } else {
@@ -680,9 +681,12 @@ function runMatchingPipeline() {
             statusOverlay.classList.add("hidden");
             
         } else {
-            drawOverlay();
+            // Fall back to user's aim
+            srcPts.push({x: templateDots[0].cx, y: templateDots[0].cy});
+            dstPts.push({x: 112, y: 112});
+            srcAreas.push(templateDots[0].area);
+            dstAreas.push(templateArea);
             statusOverlay.classList.add("hidden");
-            return;
         }
     } else {
         // Multi-dot: Original Logic
@@ -954,20 +958,31 @@ function runMatchingPipeline() {
         if (!songMetadata[match.name]) continue; // Only show active songs
         const existing = sessionTopMatches.find(m => m.name === match.name);
         if (existing) {
+            const oldBoost = Math.min((existing.hitCount || 1) - 1, 15) * 0.015;
+            existing.hitCount = (existing.hitCount || 1) + 1;
+            const newBoost = Math.min(existing.hitCount - 1, 15) * 0.015;
+            
             if (match.score > existing.score) {
                 existing.score = match.score;
                 existing.queryImageData = new ImageData(new Uint8ClampedArray(queryGridData.data), GRID_W, GRID_H);
                 updated = true;
             }
+            if (newBoost > oldBoost) {
+                updated = true;
+            }
         } else {
             match.queryImageData = new ImageData(new Uint8ClampedArray(queryGridData.data), GRID_W, GRID_H);
+            match.hitCount = 1;
             sessionTopMatches.push(match);
             updated = true;
         }
     }
     
     if (updated || (!isLiveFeed && sessionTopMatches.length === 0)) {
-        sessionTopMatches.sort((a, b) => b.score - a.score);
+        sessionTopMatches.forEach(m => {
+            m.displayScore = m.score + Math.min((m.hitCount || 1) - 1, 15) * 0.015;
+        });
+        sessionTopMatches.sort((a, b) => b.displayScore - a.displayScore);
         sessionTopMatches = sessionTopMatches.slice(0, 20);
         renderMatches(sessionTopMatches.slice(0, 5));
     }
@@ -985,7 +1000,8 @@ function renderMatches(topMatches) {
     }
     
     topMatches.forEach((match, index) => {
-        const scorePercentage = Math.max(0, Math.min(100, match.score * 100));
+        const scoreToUse = match.displayScore || match.score;
+        const scorePercentage = Math.max(0, Math.min(100, scoreToUse * 100));
         const baseName = match.name.substring(0, match.name.lastIndexOf('.'));
         const thumbUrl = `thumbnails/${encodeURIComponent(baseName)}.webp`;
         
@@ -996,30 +1012,27 @@ function renderMatches(topMatches) {
         matchItem.style.flexDirection = "column";
         
         matchItem.innerHTML = `
-            <div style="display: flex; width: 100%; gap: 0.75rem; align-items: flex-start;">
-                <!-- Thumbnail -->
-                <img src="${thumbUrl}" alt="Jacket" style="width: 60px; height: 60px; object-fit: cover; border-radius: var(--radius-sm); display: block; flex-shrink: 0;">
-                
-                <!-- Title and Artist -->
+            <div style="display: flex; width: 100%; gap: 0.75rem; align-items: flex-start; margin-bottom: 6px;">
                 <div style="flex: 1; min-width: 0;">
                     <div class="match-name" title="${meta.title}" style="width: 100%; font-size: 1.1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.title}</div>
                     <div class="match-artist" style="width: 100%; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.artist}</div>
                 </div>
-                
-                <!-- X button and Score -->
-                <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; min-width: 80px;">
-                    <button class="ban-btn" data-name="${match.name}" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0; line-height: 1;" title="Temporarily ban this match">✖</button>
-                    <div class="score-container" style="width: 100%; text-align: right; margin-top: 4px;">
-                        <div class="score-text" style="font-weight: bold; margin-bottom: 4px;">${match.score.toFixed(4)}</div>
-                        <div class="score-bar-bg" style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
-                            <div class="score-bar-fill" style="width: ${scorePercentage}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 3px;"></div>
-                        </div>
-                    </div>
-                </div>
+                <button class="ban-btn" data-name="${match.name}" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0; line-height: 1;" title="Temporarily ban this match">✖</button>
             </div>
             
-            <div class="match-content" style="display: flex; align-items: center; width: 100%; margin-top: 0.75rem; gap: 0.75rem; overflow-x: auto; padding-bottom: 4px;">
-                <div class="dots-container" style="display: flex; gap: 6px; flex-shrink: 0; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 4px;">
+            <div class="match-content" style="display: flex; align-items: center; width: 100%; gap: 0.75rem; justify-content: center;">
+                <img src="${thumbUrl}" alt="Jacket" style="width: 60px; height: 60px; object-fit: cover; border-radius: var(--radius-sm); display: block; flex-shrink: 1; min-width: 40px;">
+                <div class="dots-container" style="display: flex; gap: 4px; flex-shrink: 1; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: 4px; min-width: 0;">
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; width: 100%; gap: 8px; margin-top: 6px;">
+                <div class="score-text" style="font-size: 0.65rem; color: var(--text-muted); font-family: monospace; min-width: auto; text-align: left;">
+                    ${scoreToUse.toFixed(4)} 
+                    ${match.hitCount > 1 ? `<span style="color: var(--primary); margin-left: 2px;">(+${Math.min(match.hitCount - 1, 15) * 1.5}%)</span>` : ''}
+                </div>
+                <div class="score-bar-bg" style="flex: 1; height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px;">
+                    <div class="score-bar-fill" style="width: ${scorePercentage}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 1px;"></div>
                 </div>
             </div>
         `;
@@ -1049,10 +1062,15 @@ function renderMatches(topMatches) {
                 dotPair.style.display = "flex";
                 dotPair.style.flexDirection = "column";
                 dotPair.style.gap = "2px";
+                dotPair.style.flex = "1 1 0";
+                dotPair.style.minWidth = "20px";
+                dotPair.style.maxWidth = "40px";
                 
                 const qCanvas = document.createElement("canvas");
                 qCanvas.width = 40; qCanvas.height = 40;
-                qCanvas.style.width = "40px"; qCanvas.style.height = "40px";
+                qCanvas.style.width = "100%";
+                qCanvas.style.height = "auto";
+                qCanvas.style.aspectRatio = "1/1";
                 qCanvas.style.backgroundColor = "#000";
                 qCanvas.style.imageRendering = "pixelated";
                 qCanvas.title = "Query";
@@ -1064,7 +1082,9 @@ function renderMatches(topMatches) {
                 
                 const rCanvas = document.createElement("canvas");
                 rCanvas.width = 40; rCanvas.height = 40;
-                rCanvas.style.width = "40px"; rCanvas.style.height = "40px";
+                rCanvas.style.width = "100%";
+                rCanvas.style.height = "auto";
+                rCanvas.style.aspectRatio = "1/1";
                 rCanvas.style.backgroundColor = "#000";
                 rCanvas.style.imageRendering = "pixelated";
                 rCanvas.title = "Reference";
