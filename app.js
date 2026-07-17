@@ -808,18 +808,11 @@ function runMatchingPipeline() {
         overlayCtx.stroke();
     }
     
-    // warpAffineNearest maps Template -> Query to sample pixels properly
-    const warpedData = warpAffineNearest(imgData, 224, 224, M);
-    
-    // 5. Build 80x120 Query Grid
-    const qCanvas = document.createElement("canvas");
-    qCanvas.width = GRID_W; qCanvas.height = GRID_H;
-    const dqCtx = qCanvas.getContext("2d", { willReadFrequently: true });
-    
-    dqCtx.fillStyle = "#000"; dqCtx.fillRect(0, 0, GRID_W, GRID_H);
-    
-    // Temporarily write warped data back to offscreen to drawImage crop
-    offCtx.putImageData(warpedData, 0, 0);
+    // 5. Build 80x120 Query Grid directly from imgData using M
+    const queryGridData = new ImageData(GRID_W, GRID_H);
+    for (let i = 0; i < GRID_W * GRID_H; i++) {
+        queryGridData.data[i*4+3] = 255;
+    }
     
     // Map each template dot to the correct base centroid index
     const tdSlotIndices = templateDots.map(td => {
@@ -832,26 +825,33 @@ function runMatchingPipeline() {
     });
     
     for (let i = 0; i < templateDots.length; i++) {
-        const td = templateDots[i], slot = GRID_SLOTS[tdSlotIndices[i]];
-        const cx = Math.round(td.cx), cy = Math.round(td.cy);
-        dqCtx.drawImage(
-            offscreenCanvas,
-            cx - 20, cy - 20, 40, 40,
-            slot.x - 20, slot.y - 20, 40, 40
-        );
-    }
-    
-    // Apply visual black mask for debug canvas
-    dqCtx.save();
-    const queryGridData = dqCtx.getImageData(0, 0, GRID_W, GRID_H);
-    for (let i = 0; i < GRID_W * GRID_H; i++) {
-        if (!config.eroded80x120[i]) {
-            queryGridData.data[i*4] = 0;
-            queryGridData.data[i*4+1] = 0;
-            queryGridData.data[i*4+2] = 0;
+        const slot = GRID_SLOTS[tdSlotIndices[i]];
+        const cx = Math.round(templateDots[i].cx);
+        const cy = Math.round(templateDots[i].cy);
+        
+        for (let dy = -20; dy < 20; dy++) {
+            for (let dx = -20; dx < 20; dx++) {
+                const gx = slot.x + dx;
+                const gy = slot.y + dy;
+                const tx = cx + dx;
+                const ty = cy + dy;
+                
+                const gridIdx = gy * GRID_W + gx;
+                
+                if (config.eroded80x120[gridIdx]) {
+                    const sx = Math.round(M.a * tx + M.b * ty + M.tx);
+                    const sy = Math.round(M.c * tx + M.d * ty + M.ty);
+                    
+                    if (sx >= 0 && sx < 224 && sy >= 0 && sy < 224) {
+                        const srcIdx = (sy * 224 + sx) * 4;
+                        queryGridData.data[gridIdx*4] = imgData.data[srcIdx];
+                        queryGridData.data[gridIdx*4+1] = imgData.data[srcIdx+1];
+                        queryGridData.data[gridIdx*4+2] = imgData.data[srcIdx+2];
+                    }
+                }
+            }
         }
     }
-    dqCtx.putImageData(queryGridData, 0, 0);
     
     // 6. Extract pixels and apply edge fading for UI only
     const qR = [], qG = [], qB = [];
@@ -896,7 +896,6 @@ function runMatchingPipeline() {
             }
         }
     }
-    dqCtx.putImageData(queryGridData, 0, 0);
     
     const normalize = (channel) => {
         const mean = channel.reduce((a, b) => a + b, 0) / channel.length;
@@ -922,17 +921,18 @@ function runMatchingPipeline() {
     const meanQB = qB.reduce((a, b) => a + b, 0) / qB.length;
     const qHsv = rgbToHsv(meanQR, meanQG, meanQB);
     
+    const stride = 2;
     for (let j = 0; j < numJackets; j++) {
         const dbOffset = j * pixelCount * 3;
         let sumProdR = 0, sumProdG = 0, sumProdB = 0;
         
-        for (let idx = 0; idx < pixelCount; idx++) {
+        for (let idx = 0; idx < pixelCount; idx += stride) {
             sumProdR += qRNorm[idx] * dbNorms[dbOffset + idx*3];
             sumProdG += qGNorm[idx] * dbNorms[dbOffset + idx*3 + 1];
             sumProdB += qBNorm[idx] * dbNorms[dbOffset + idx*3 + 2];
         }
         
-        let score = (sumProdR + sumProdG + sumProdB) / 3.0;
+        let score = ((sumProdR + sumProdG + sumProdB) / 3.0) * stride;
         
         if (enableColorFilter) {
             const rHsv0 = dbMeanHsv[j * 2];
@@ -983,8 +983,8 @@ function runMatchingPipeline() {
             m.displayScore = m.score + Math.min((m.hitCount || 1) - 1, 15) * 0.015;
         });
         sessionTopMatches.sort((a, b) => b.displayScore - a.displayScore);
-        sessionTopMatches = sessionTopMatches.slice(0, 20);
-        renderMatches(sessionTopMatches.slice(0, 5));
+        sessionTopMatches = sessionTopMatches.slice(0, 6);
+        renderMatches(sessionTopMatches.slice(0, 3));
     }
 }
 
@@ -1108,7 +1108,7 @@ function renderMatches(topMatches) {
             const name = e.target.getAttribute('data-name');
             bannedEntries.add(name);
             sessionTopMatches = sessionTopMatches.filter(m => m.name !== name);
-            renderMatches(sessionTopMatches.slice(0, 5));
+            renderMatches(sessionTopMatches.slice(0, 3));
         });
     });
 }
