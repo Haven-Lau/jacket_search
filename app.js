@@ -1190,7 +1190,7 @@ function renderMatches(topMatches) {
     const banBtns = matchesList.querySelectorAll('.ban-btn');
     banBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const name = e.target.getAttribute('data-name');
+            const name = e.currentTarget.getAttribute('data-name');
             bannedEntries.add(name);
             sessionTopMatches = sessionTopMatches.filter(m => m.name !== name);
             renderMatches(sessionTopMatches.slice(0, 3));
