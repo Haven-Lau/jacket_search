@@ -37,6 +37,30 @@ let processingInterval = null;
 let bannedEntries = new Set();
 let enableEdgeFade = false;
 let enableColorFilter = true;
+let confidenceTrackingMode = "decay";
+
+class KalmanFilter1D {
+    constructor(processNoise = 0.05, measurementNoise = 2.0, estimatedError = 1.0) {
+        this.q = processNoise;
+        this.r = measurementNoise;
+        this.p = estimatedError;
+        this.x = null;
+    }
+    
+    update(measurement) {
+        if (this.x === null) {
+            this.x = measurement;
+            return this.x;
+        }
+        this.p = this.p + this.q;
+        const gain = this.p / (this.p + this.r);
+        this.x = this.x + gain * (measurement - this.x);
+        this.p = (1 - gain) * this.p;
+        return this.x;
+    }
+}
+
+let dotTrackers = []; // { x: KalmanFilter1D, y: KalmanFilter1D }[]
 
 // DOM Elements
 const video = document.getElementById("webcam-video");
@@ -96,7 +120,7 @@ const toggleFadeBtn = document.getElementById("toggle-fade-btn");
 if (toggleFadeBtn) {
     toggleFadeBtn.addEventListener("click", () => {
         enableEdgeFade = !enableEdgeFade;
-        toggleFadeBtn.textContent = `Fade: ${enableEdgeFade ? "ON" : "OFF"}`;
+        toggleFadeBtn.textContent = enableEdgeFade ? "ON" : "OFF";
         toggleFadeBtn.className = enableEdgeFade ? "btn primary-btn" : "btn outline-btn";
     });
 }
@@ -105,8 +129,18 @@ const toggleColorFilterBtn = document.getElementById("toggle-color-filter-btn");
 if (toggleColorFilterBtn) {
     toggleColorFilterBtn.addEventListener("click", () => {
         enableColorFilter = !enableColorFilter;
-        toggleColorFilterBtn.textContent = `Filter: ${enableColorFilter ? "ON" : "OFF"}`;
+        toggleColorFilterBtn.textContent = enableColorFilter ? "ON" : "OFF";
         toggleColorFilterBtn.className = enableColorFilter ? "btn primary-btn" : "btn outline-btn";
+    });
+}
+
+const toggleDecayBtn = document.getElementById("toggle-decay-btn");
+if (toggleDecayBtn) {
+    toggleDecayBtn.addEventListener("click", () => {
+        confidenceTrackingMode = confidenceTrackingMode === "decay" ? "infinite" : "decay";
+        const isOn = confidenceTrackingMode === "decay";
+        toggleDecayBtn.textContent = isOn ? "ON" : "OFF";
+        toggleDecayBtn.className = isOn ? "btn primary-btn" : "btn outline-btn";
     });
 }
 
@@ -854,6 +888,23 @@ function runMatchingPipeline() {
         }
     }
     
+    // Apply Spatial Smoothing (Kalman Filter)
+    if (dotTrackers.length !== dstPts.length) {
+        dotTrackers = dstPts.map(() => ({ x: new KalmanFilter1D(), y: new KalmanFilter1D() }));
+    }
+    
+    for (let i = 0; i < dstPts.length; i++) {
+        // Reset tracker if the jump is too large (e.g. > 30px)
+        if (dotTrackers[i].x.x !== null) {
+            const dist = Math.hypot(dstPts[i].x - dotTrackers[i].x.x, dstPts[i].y - dotTrackers[i].y.x);
+            if (dist > 30) {
+                dotTrackers[i] = { x: new KalmanFilter1D(), y: new KalmanFilter1D() };
+            }
+        }
+        dstPts[i].x = dotTrackers[i].x.update(dstPts[i].x);
+        dstPts[i].y = dotTrackers[i].y.update(dstPts[i].y);
+    }
+    
     // 4. Affine Alignment (Warp to perfectly align with templates)
     const M = estimateAffine(srcPts, dstPts, srcAreas, dstAreas);
     if (!M) return;
@@ -1029,6 +1080,14 @@ function runMatchingPipeline() {
     let topCurrent = similarityResults.slice(0, 5);
     
     let updated = false;
+
+    if (confidenceTrackingMode === "decay") {
+        // Decay existing matches
+        sessionTopMatches.forEach(m => {
+            m.hitCount = (m.hitCount || 1) * 0.85;
+        });
+    }
+    
     for (const match of topCurrent) {
         if (match.score < 0.35) continue; // Filter bad matches
         if (bannedEntries.has(match.name)) continue;
@@ -1036,7 +1095,14 @@ function runMatchingPipeline() {
         const existing = sessionTopMatches.find(m => m.name === match.name);
         if (existing) {
             const oldBoost = Math.min((existing.hitCount || 1) - 1, 15) * 0.015;
-            existing.hitCount = (existing.hitCount || 1) + 1;
+            
+            if (confidenceTrackingMode === "decay") {
+                // Boost hitCount up, maxing at 15
+                existing.hitCount = Math.min((existing.hitCount || 1) + 1.5, 15);
+            } else {
+                existing.hitCount = (existing.hitCount || 1) + 1;
+            }
+            
             const newBoost = Math.min(existing.hitCount - 1, 15) * 0.015;
             
             if (match.score > existing.score) {
@@ -1044,7 +1110,7 @@ function runMatchingPipeline() {
                 existing.queryImageData = new ImageData(new Uint8ClampedArray(queryGridData.data), GRID_W, GRID_H);
                 updated = true;
             }
-            if (newBoost > oldBoost) {
+            if (newBoost > oldBoost || confidenceTrackingMode === "decay") {
                 updated = true;
             }
         } else {
@@ -1053,6 +1119,12 @@ function runMatchingPipeline() {
             sessionTopMatches.push(match);
             updated = true;
         }
+    }
+    
+    if (confidenceTrackingMode === "decay") {
+        sessionTopMatches = sessionTopMatches.filter(m => m.hitCount > 0.1);
+        // Force update on decay mode to continually reduce display scores visually
+        updated = true;
     }
     
     if (updated || (!isLiveFeed && sessionTopMatches.length === 0)) {
@@ -1212,6 +1284,7 @@ maskButtons.forEach(btn => {
         targetBtn.classList.remove("outline-btn");
         targetBtn.classList.add("primary-btn");
         activeMaskName = targetBtn.getAttribute("data-mask");
+        dotTrackers = []; // Reset Kalman filters on mask change
         drawOverlay();
     });
 });
