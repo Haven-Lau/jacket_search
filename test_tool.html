@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jacket Puzzle Preview Tool</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button, select, input[type="checkbox"] {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #444;
+        }
+
+        button.active {
+            background-color: #007bff;
+        }
+
+        .canvas-container {
+            position: relative;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            height: 400px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .jacket-name {
+            font-size: 18px;
+            font-weight: 500;
+            color: #ccc;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .jacket-name.overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 0;
+            margin: 0;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .crt-effect::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .canvas-container.crt-distortion {
+            animation: crt-flicker 0.15s infinite;
+        }
+
+        @keyframes crt-flicker {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.002) translate(0.5px, 0.5px); }
+            100% { transform: scale(1) translate(0, 0); }
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Puzzle Preview Tool</h1>
+    
+    <div class="controls">
+        <button id="btn-random-jacket">Random Jacket</button>
+        <button id="btn-toggle-preview" class="active">Preview Mask: ON</button>
+        <select id="mask-select">
+            <option value="1">1-Dot Mask</option>
+            <option value="3">3-Dot Mask</option>
+            <option value="5" selected>5-Dot Mask</option>
+        </select>
+        <button id="btn-toggle-color-balance">Color Balance: OFF</button>
+        <button id="btn-toggle-crt">CRT Effect: OFF</button>
+        <button id="btn-toggle-distort">Distortion: OFF</button>
+        <button id="btn-toggle-name-pos">Name Pos: Below</button>
+    </div>
+
+    <div class="canvas-container" id="canvas-wrapper">
+        <canvas id="puzzleCanvas" width="400" height="400"></canvas>
+        <div class="jacket-name" id="jacket-name-display">Loading...</div>
+    </div>
+
+    <script>
+        let jackets = [];
+        let metadata = {};
+        let currentJacket = null;
+        let maskImages = {};
+        
+        let state = {
+            previewMask: true,
+            maskType: '5',
+            colorBalanceEnabled: false,
+            colorBalance: { r: 1, g: 1, b: 1 },
+            crt: false,
+            distort: false,
+            overlayName: false,
+            blueMaskColor: { r: 0, g: 0, b: 200 }
+        };
+
+        const canvas = document.getElementById('puzzleCanvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const jacketNameDisplay = document.getElementById('jacket-name-display');
+        const wrapper = document.getElementById('canvas-wrapper');
+
+        async function init() {
+            try {
+                const [idxRes, metaRes] = await Promise.all([
+                    fetch('jacket_index.json'),
+                    fetch('song_metadata.json')
+                ]);
+                jackets = await idxRes.json();
+                metadata = await metaRes.json();
+                
+                // Preload masks
+                await preloadMask('1');
+                await preloadMask('3');
+                await preloadMask('5');
+                
+                randomizeBlueColor();
+                pickRandomJacket();
+                
+                setupEventListeners();
+            } catch (e) {
+                jacketNameDisplay.innerText = "Failed to load index.";
+                console.error(e);
+            }
+        }
+
+        function preloadMask(dots) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    maskImages[dots] = img;
+                    resolve();
+                };
+                img.src = `masks/${dots}-dot-mask.png`;
+            });
+        }
+
+        function randomizeBlueColor() {
+            // b > 120, r < 80
+            state.blueMaskColor = {
+                r: Math.floor(Math.random() * 80),
+                g: Math.floor(Math.random() * 100), // kept g relatively low too
+                b: Math.floor(120 + Math.random() * 135)
+            };
+        }
+
+        function pickRandomJacket() {
+            if (jackets.length === 0) return;
+            const filename = jackets[Math.floor(Math.random() * jackets.length)];
+            
+            let displayName = filename.replace('.png', '');
+            if (metadata[filename] && metadata[filename].title) {
+                displayName = metadata[filename].title;
+            }
+            jacketNameDisplay.innerText = displayName;
+            
+            const img = new Image();
+            img.onload = () => {
+                currentJacket = img;
+                render();
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load ${filename}, picking another jacket...`);
+                pickRandomJacket();
+            };
+            img.src = `jackets/${filename}`;
+        }
+
+        function render() {
+            if (!currentJacket) return;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Create temporary canvas to hold the transformed jacket
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            // Apply slight distortion if needed (simple wave effect)
+            if (state.distort) {
+                tempCtx.drawImage(currentJacket, 0, 0, canvas.width, canvas.height);
+                const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+                const newImgData = tempCtx.createImageData(canvas.width, canvas.height);
+                
+                for (let y = 0; y < canvas.height; y++) {
+                    for (let x = 0; x < canvas.width; x++) {
+                        // Apply wave distortion
+                        let offsetX = Math.floor(Math.sin(y * 0.05) * 5);
+                        let offsetY = Math.floor(Math.cos(x * 0.05) * 5);
+                        
+                        let srcX = Math.min(Math.max(x + offsetX, 0), canvas.width - 1);
+                        let srcY = Math.min(Math.max(y + offsetY, 0), canvas.height - 1);
+                        
+                        let srcIdx = (srcY * canvas.width + srcX) * 4;
+                        let dstIdx = (y * canvas.width + x) * 4;
+                        
+                        newImgData.data[dstIdx] = imgData.data[srcIdx];
+                        newImgData.data[dstIdx+1] = imgData.data[srcIdx+1];
+                        newImgData.data[dstIdx+2] = imgData.data[srcIdx+2];
+                        newImgData.data[dstIdx+3] = imgData.data[srcIdx+3];
+                    }
+                }
+                tempCtx.putImageData(newImgData, 0, 0);
+            } else {
+                tempCtx.drawImage(currentJacket, 0, 0, canvas.width, canvas.height);
+            }
+
+            // Apply color balance if enabled
+            if (state.colorBalanceEnabled) {
+                const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    imgData.data[i] = Math.min(255, imgData.data[i] * state.colorBalance.r);     // R
+                    imgData.data[i+1] = Math.min(255, imgData.data[i+1] * state.colorBalance.g); // G
+                    imgData.data[i+2] = Math.min(255, imgData.data[i+2] * state.colorBalance.b); // B
+                }
+                tempCtx.putImageData(imgData, 0, 0);
+            }
+
+            // Draw the jacket to main canvas
+            ctx.drawImage(tempCanvas, 0, 0);
+
+            // Apply Mask if preview is ON
+            if (state.previewMask && maskImages[state.maskType]) {
+                const maskCanvas = document.createElement('canvas');
+                maskCanvas.width = canvas.width;
+                maskCanvas.height = canvas.height;
+                const mCtx = maskCanvas.getContext('2d');
+                
+                mCtx.drawImage(maskImages[state.maskType], 0, 0, canvas.width, canvas.height);
+                const mData = mCtx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                const finalData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < mData.data.length; i += 4) {
+                    // mask is black and white. White (255) means hole (show jacket), Black (0) means mask (show blue)
+                    const maskVal = mData.data[i]; 
+                    if (maskVal < 128) {
+                        // Apply blue mask
+                        finalData.data[i] = state.blueMaskColor.r;
+                        finalData.data[i+1] = state.blueMaskColor.g;
+                        finalData.data[i+2] = state.blueMaskColor.b;
+                    }
+                }
+                ctx.putImageData(finalData, 0, 0);
+            }
+        }
+
+        function setupEventListeners() {
+            const btnRandom = document.getElementById('btn-random-jacket');
+            btnRandom.addEventListener('click', () => {
+                randomizeBlueColor();
+                pickRandomJacket();
+            });
+
+            const btnPreview = document.getElementById('btn-toggle-preview');
+            btnPreview.addEventListener('click', () => {
+                state.previewMask = !state.previewMask;
+                btnPreview.innerText = `Preview Mask: ${state.previewMask ? 'ON' : 'OFF'}`;
+                btnPreview.className = state.previewMask ? 'active' : '';
+                render();
+            });
+
+            const maskSelect = document.getElementById('mask-select');
+            maskSelect.addEventListener('change', (e) => {
+                state.maskType = e.target.value;
+                render();
+            });
+
+            const btnColorBal = document.getElementById('btn-toggle-color-balance');
+            btnColorBal.addEventListener('click', () => {
+                state.colorBalanceEnabled = !state.colorBalanceEnabled;
+                btnColorBal.innerText = `Color Balance: ${state.colorBalanceEnabled ? 'ON' : 'OFF'}`;
+                btnColorBal.className = state.colorBalanceEnabled ? 'active' : '';
+                
+                if (state.colorBalanceEnabled) {
+                    // Random multipliers between 0.7 and 1.3
+                    state.colorBalance = {
+                        r: 0.7 + Math.random() * 0.6,
+                        g: 0.7 + Math.random() * 0.6,
+                        b: 0.7 + Math.random() * 0.6
+                    };
+                }
+                render();
+            });
+
+            const btnCrt = document.getElementById('btn-toggle-crt');
+            btnCrt.addEventListener('click', () => {
+                state.crt = !state.crt;
+                btnCrt.innerText = `CRT Effect: ${state.crt ? 'ON' : 'OFF'}`;
+                btnCrt.className = state.crt ? 'active' : '';
+                
+                if (state.crt) {
+                    wrapper.classList.add('crt-effect');
+                    wrapper.classList.add('crt-distortion');
+                } else {
+                    wrapper.classList.remove('crt-effect');
+                    wrapper.classList.remove('crt-distortion');
+                }
+            });
+
+            const btnDistort = document.getElementById('btn-toggle-distort');
+            btnDistort.addEventListener('click', () => {
+                state.distort = !state.distort;
+                btnDistort.innerText = `Distortion: ${state.distort ? 'ON' : 'OFF'}`;
+                btnDistort.className = state.distort ? 'active' : '';
+                render();
+            });
+
+            const btnNamePos = document.getElementById('btn-toggle-name-pos');
+            btnNamePos.addEventListener('click', () => {
+                state.overlayName = !state.overlayName;
+                btnNamePos.innerText = `Name Pos: ${state.overlayName ? 'Overlay' : 'Below'}`;
+                btnNamePos.className = state.overlayName ? 'active' : '';
+                
+                if (state.overlayName) {
+                    jacketNameDisplay.classList.add('overlay');
+                } else {
+                    jacketNameDisplay.classList.remove('overlay');
+                }
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -205,7 +205,8 @@ h1, h2, h3, .logo-text {
     transition: opacity 0.3s ease;
 }
 
-.overlay.hidden {
+.overlay.hidden,
+.overlay-text.hidden {
     opacity: 0;
     pointer-events: none;
 }

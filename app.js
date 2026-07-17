@@ -385,6 +385,7 @@ async function prepareMaskConfigs(sCtx) {
         // Pre-normalize the database for this mask
         const numJackets = jacketNames.length;
         const dbNorms = new Float32Array(numJackets * pixelCount * 3);
+        const dbMeanHsv = new Float32Array(numJackets * 2);
         
         for (let j = 0; j < numJackets; j++) {
             const col = j % SPRITE_COLS;
@@ -399,6 +400,13 @@ async function prepareMaskConfigs(sCtx) {
                     bChannel.push(imgData[idx*4+2]);
                 }
             }
+            
+            const meanR = rChannel.reduce((a, b) => a + b, 0) / pixelCount;
+            const meanG = gChannel.reduce((a, b) => a + b, 0) / pixelCount;
+            const meanB = bChannel.reduce((a, b) => a + b, 0) / pixelCount;
+            const hsv = rgbToHsv(meanR, meanG, meanB);
+            dbMeanHsv[j * 2] = hsv[0];
+            dbMeanHsv[j * 2 + 1] = hsv[1];
             
             // Center and divide by L2 norm to make true NCC a simple dot product
             const normalize = (channel) => {
@@ -438,7 +446,7 @@ async function prepareMaskConfigs(sCtx) {
         }
         const punchHoleBitmap = await createImageBitmap(punchImgData);
         
-        maskConfigs[name] = { templateDots, slotIndices: tdSlotIndices, eroded80x120, pixelCount, dbNorms, punchHoleBitmap };
+        maskConfigs[name] = { templateDots, slotIndices: tdSlotIndices, eroded80x120, pixelCount, dbNorms, dbMeanHsv, punchHoleBitmap };
     }
 }
 
@@ -584,10 +592,6 @@ function processQueryFrame() {
     runMatchingPipeline();
 }
 
-function showStatus(msg) {
-    statusOverlay.textContent = msg;
-    statusOverlay.classList.remove("hidden");
-}
 
 function runMatchingPipeline() {
     const config = maskConfigs[activeMaskName];
@@ -677,7 +681,7 @@ function runMatchingPipeline() {
             
         } else {
             drawOverlay();
-            showStatus(`Align the dot...`);
+            statusOverlay.classList.add("hidden");
             return;
         }
     } else {
@@ -763,7 +767,7 @@ function runMatchingPipeline() {
         
         if (dstPts.length < templateDots.length) {
             drawOverlay();
-            showStatus(`Align all ${templateDots.length} dots...`);
+            statusOverlay.classList.add("hidden");
             return;
         }
         statusOverlay.classList.add("hidden");
@@ -906,6 +910,13 @@ function runMatchingPipeline() {
     const similarityResults = [];
     const pixelCount = config.pixelCount;
     const dbNorms = config.dbNorms;
+    const dbMeanHsv = config.dbMeanHsv;
+    
+    // Calculate mean HSV for the query
+    const meanQR = qR.reduce((a, b) => a + b, 0) / qR.length;
+    const meanQG = qG.reduce((a, b) => a + b, 0) / qG.length;
+    const meanQB = qB.reduce((a, b) => a + b, 0) / qB.length;
+    const qHsv = rgbToHsv(meanQR, meanQG, meanQB);
     
     for (let j = 0; j < numJackets; j++) {
         const dbOffset = j * pixelCount * 3;
@@ -917,55 +928,28 @@ function runMatchingPipeline() {
             sumProdB += qBNorm[idx] * dbNorms[dbOffset + idx*3 + 2];
         }
         
-        const score = (sumProdR + sumProdG + sumProdB) / 3.0;
+        let score = (sumProdR + sumProdG + sumProdB) / 3.0;
+        
+        if (enableColorFilter) {
+            const rHsv0 = dbMeanHsv[j * 2];
+            const rHsv1 = dbMeanHsv[j * 2 + 1];
+            
+            const hueDiff = Math.abs(qHsv[0] - rHsv0);
+            const hueDist = Math.min(hueDiff, 360 - hueDiff) / 180.0;
+            const satDist = Math.abs(qHsv[1] - rHsv1);
+            
+            score -= (hueDist + satDist) * 0.2;
+        }
+        
         similarityResults.push({ name: jacketNames[j], index: j, score });
     }
     
     similarityResults.sort((a, b) => b.score - a.score);
-    let topCurrent = similarityResults.slice(0, 15);
-    
-    if (enableColorFilter) {
-        const rCtxTemp = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
-        rCtxTemp.canvas.width = GRID_W; rCtxTemp.canvas.height = GRID_H;
-        const cols = Math.floor(spriteCanvas.width / GRID_W);
-        
-        for (let i = 0; i < topCurrent.length; i++) {
-            const match = topCurrent[i];
-            const sx = (match.index % cols) * GRID_W;
-            const sy = Math.floor(match.index / cols) * GRID_H;
-            rCtxTemp.drawImage(spriteCanvas, sx, sy, GRID_W, GRID_H, 0, 0, GRID_W, GRID_H);
-            const refData = rCtxTemp.getImageData(0, 0, GRID_W, GRID_H).data;
-            
-            let hueDistSum = 0, satDistSum = 0, colorPixelCount = 0;
-            for (let p = 0; p < GRID_W * GRID_H; p++) {
-                if (config.eroded80x120[p]) {
-                    const qHsv = rgbToHsv(qR[colorPixelCount], qG[colorPixelCount], qB[colorPixelCount]);
-                    const rHsv = rgbToHsv(refData[p*4], refData[p*4+1], refData[p*4+2]);
-                    
-                    const hueDiff = Math.abs(qHsv[0] - rHsv[0]);
-                    const hueDist = Math.min(hueDiff, 360 - hueDiff) / 180.0;
-                    const satDist = Math.abs(qHsv[1] - rHsv[1]);
-                    
-                    hueDistSum += hueDist;
-                    satDistSum += satDist;
-                    colorPixelCount++;
-                }
-            }
-            
-            if (colorPixelCount > 0) {
-                const avgColorDist = (hueDistSum + satDistSum) / colorPixelCount;
-                match.score = match.score - (avgColorDist * 0.2);
-            }
-        }
-        
-        topCurrent.sort((a, b) => b.score - a.score);
-    }
-    
-    topCurrent = topCurrent.slice(0, 5);
+    let topCurrent = similarityResults.slice(0, 5);
     
     let updated = false;
     for (const match of topCurrent) {
-        if (match.score < 0.45) continue; // Filter bad matches
+        if (match.score < 0.35) continue; // Filter bad matches
         if (bannedEntries.has(match.name)) continue;
         if (!songMetadata[match.name]) continue; // Only show active songs
         const existing = sessionTopMatches.find(m => m.name === match.name);
