@@ -14,45 +14,63 @@
 
         <main class="main-content">
             <div class="panel vision-panel">
-                <div class="panel-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 0.5rem; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto;">
+                <div class="panel-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto;">
                     <div class="mask-buttons" id="mask-buttons" style="display: flex; gap: 0.25rem; align-items: center;">
-                        <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">Dots:</span>
-                        <button class="btn outline-btn" data-mask="1-dot" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; min-width: auto;">1</button>
-                        <button class="btn outline-btn" data-mask="3-dot" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; min-width: auto;">3</button>
-                        <button class="btn primary-btn" data-mask="5-dot" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; min-width: auto;">5</button>
+                        <button class="btn primary-btn icon-btn" data-mask="1-dot" title="1 Dot">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                        </button>
+                        <button class="btn outline-btn icon-btn" data-mask="3-dot" title="3 Dots">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="16.5" cy="16.5" r="1.5" fill="currentColor"/></svg>
+                        </button>
+                        <button class="btn outline-btn icon-btn" data-mask="5-dot" title="5 Dots">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="16.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="16.5" cy="16.5" r="1.5" fill="currentColor"/><circle cx="7.5" cy="16.5" r="1.5" fill="currentColor"/></svg>
+                        </button>
                     </div>
                     
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button id="refresh-camera-btn" class="btn outline-btn" style="padding: 0.3rem 0.5rem; font-size: 1.1rem; border: 1px solid var(--border);" title="Refresh Camera">🔄</button>
-                        <button id="settings-btn" class="btn outline-btn" style="padding: 0.3rem 0.5rem; font-size: 1.1rem; border: 1px solid var(--border);" title="Settings">⚙️</button>
+                        <button id="refresh-camera-btn" class="btn outline-btn icon-btn" title="Restart Camera">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                        </button>
+                        <button id="settings-btn" class="btn outline-btn icon-btn" title="Settings">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </button>
                     </div>
                 </div>
-                <div class="video-wrapper">
+                <div class="video-wrapper rounded-bottom">
                     <video id="webcam-video" autoplay playsinline muted></video>
                     <canvas id="overlay-canvas"></canvas>
                     <div id="loading-overlay" class="overlay flex-center">
                         <div class="spinner"></div>
-                        <p id="loading-text">Initializing...</p>
+                        <p id="loading-text" style="margin-top: 1rem; font-size: 0.8rem; opacity: 0.6; font-weight: 500;">Initializing...</p>
+                        <div id="progress-container" style="width: 60%; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin-top: 0.75rem; overflow: hidden; display: none;">
+                            <div id="progress-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.2s ease-out;"></div>
+                        </div>
                     </div>
                     <div id="status-overlay" class="overlay-text hidden"></div>
                 </div>
-                <div id="exposure-container" style="display: none; justify-content: center; align-items: center; padding: 0.5rem; gap: 0.5rem; background: var(--bg-secondary); border-top: 1px solid var(--border); border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius);">
-                    <span style="font-size: 1.2rem;" title="Exposure Compensation">💡</span>
-                    <input type="range" id="exposure-slider" min="-3" max="0" step="0.1" value="0" style="flex-grow: 1; max-width: 200px;">
+                <div id="exposure-container" class="exposure-slider-container" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="exposure-icon"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    <input type="range" id="exposure-slider" min="-3" max="0" step="0.1" value="0" class="styled-slider">
                 </div>
             </div>
 
             <div class="panel results-panel">
-                <div class="panel-header" style="display: flex; flex-direction: row; justify-content: flex-end; padding: 0.5rem;">
+                <div class="panel-header" style="display: flex; flex-direction: row; justify-content: flex-end; margin-bottom: 1rem;">
                     <div class="controls">
-                        <button id="freeze-btn" class="btn outline-btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; min-width: auto;">Freeze</button>
-                        <button id="clear-matches-btn" class="btn outline-btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; min-width: auto;">Clear</button>
+                        <button id="freeze-btn" class="btn outline-btn icon-btn" title="Freeze">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                        </button>
+                        <button id="clear-matches-btn" class="btn outline-btn icon-btn" title="Clear">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        </button>
                     </div>
                 </div>
                 
                 <div id="matches-list" class="matches-container">
                     <div class="empty-state">
-                        <div class="empty-icon">⏳</div>
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+                        </div>
                         <p>Waiting for clear visual feed...</p>
                     </div>
                 </div>
@@ -63,20 +81,23 @@
             <div class="panel" style="width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h2 style="font-family: 'Outfit', sans-serif; font-weight: 700;">Settings</h2>
-                    <button id="close-settings-btn" class="btn outline-btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; min-width: auto;">Close</button>
+                    <button id="close-settings-btn" class="btn outline-btn icon-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                 </div>
                 
-                <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Fade Fringes</label>
-                    <div style="margin-top: 0.25rem;">
-                        <button id="toggle-fade-btn" class="btn outline-btn" style="width: 100%;">Fade: OFF</button>
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Fade Fringes</label>
+                        <div style="margin-top: 0.25rem;">
+                            <button id="toggle-fade-btn" class="btn outline-btn" style="width: 100%;">Fade: OFF</button>
+                        </div>
                     </div>
-                </div>
-
-                <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Color Filter</label>
-                    <div style="margin-top: 0.25rem;">
-                        <button id="toggle-color-filter-btn" class="btn primary-btn" style="width: 100%;">Filter: ON</button>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Color Filter</label>
+                        <div style="margin-top: 0.25rem;">
+                            <button id="toggle-color-filter-btn" class="btn primary-btn" style="width: 100%;">Filter: ON</button>
+                        </div>
                     </div>
                 </div>
 

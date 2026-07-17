@@ -28,7 +28,7 @@ let songMetadata = {};
 let databaseLoaded = false;
 let spriteCanvas = null; // Holds the 2560x8280 sprite
 let maskConfigs = {}; // Stores configuration and pre-normalized DB per mask
-let activeMaskName = "5-dot";
+let activeMaskName = "1-dot";
 let isLiveFeed = true;
 let sessionTopMatches = [];
 let isFrozen = false;
@@ -62,6 +62,11 @@ let currentDeviceId = null;
 
 settingsBtn.addEventListener("click", () => settingsModal.classList.remove("hidden"));
 closeSettingsBtn.addEventListener("click", () => settingsModal.classList.add("hidden"));
+settingsModal.addEventListener("click", (e) => {
+    if (e.target === settingsModal) {
+        settingsModal.classList.add("hidden");
+    }
+});
 refreshCameraBtn.addEventListener("click", () => {
     if (currentDeviceId) startCamera(currentDeviceId);
     else setupCameras();
@@ -69,17 +74,22 @@ refreshCameraBtn.addEventListener("click", () => {
 
 freezeBtn.addEventListener("click", () => {
     isFrozen = !isFrozen;
-    freezeBtn.textContent = isFrozen ? "Unfreeze" : "Freeze";
-    freezeBtn.className = isFrozen ? "btn primary-btn btn-sm" : "btn outline-btn btn-sm";
+    freezeBtn.innerHTML = isFrozen 
+        ? `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` 
+        : `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+    freezeBtn.className = isFrozen ? "btn primary-btn icon-btn" : "btn outline-btn icon-btn";
+    freezeBtn.title = isFrozen ? "Unfreeze" : "Freeze";
 });
 
 clearMatchesBtn.addEventListener("click", () => {
     bannedEntries.clear();
     sessionTopMatches = [];
     matchesList.innerHTML = `<div class="empty-state">
-        <div class="empty-icon">⏳</div>
-        <p>Waiting for clear visual feed...</p>
-    </div>`;
+            <div class="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+            </div>
+            <p>Waiting for clear visual feed...</p>
+        </div>`;
 });
 
 const toggleFadeBtn = document.getElementById("toggle-fade-btn");
@@ -301,10 +311,68 @@ async function initDatabase() {
             songMetadata = await metaRes.json();
         }
         
-        loadingText.textContent = "Downloading sprite sheet (~3.5 MB)...";
+        loadingText.textContent = "Loading sprite sheet...";
+        const progressBarContainer = document.getElementById("progress-container");
+        const progressBar = document.getElementById("progress-bar");
+        if(progressBarContainer) progressBarContainer.style.display = "block";
+
         const spriteImg = new Image();
-        spriteImg.src = "jackets_sprite.webp";
-        await new Promise((resolve, reject) => { spriteImg.onload = resolve; spriteImg.onerror = reject; });
+        
+        let loadedFromCache = false;
+        let cache = null;
+        try {
+            if ('caches' in window) {
+                cache = await caches.open('jacket-sprite-cache-v1');
+                const cachedResponse = await cache.match('jackets_sprite.webp');
+                if (cachedResponse) {
+                    loadingText.textContent = "Loading sprite from cache...";
+                    if (progressBar) progressBar.style.width = '100%';
+                    const blob = await cachedResponse.blob();
+                    await new Promise((resolve) => {
+                        spriteImg.onload = () => { URL.revokeObjectURL(spriteImg.src); resolve(); };
+                        spriteImg.src = URL.createObjectURL(blob);
+                    });
+                    loadedFromCache = true;
+                }
+            }
+        } catch (e) {
+            console.warn("Cache API not available or failed", e);
+        }
+
+        if (!loadedFromCache) {
+            loadingText.textContent = "Downloading sprite sheet (~3.5 MB)...";
+            await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', 'jackets_sprite.webp', true);
+                xhr.responseType = 'blob';
+                xhr.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        if (progressBar) progressBar.style.width = percentComplete + '%';
+                    }
+                };
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        const blob = xhr.response;
+                        if (cache) {
+                            try { cache.put('jackets_sprite.webp', new Response(blob)); } 
+                            catch(e) { console.warn("Failed to cache sprite", e); }
+                        }
+                        spriteImg.onload = () => {
+                            URL.revokeObjectURL(spriteImg.src);
+                            resolve();
+                        };
+                        spriteImg.src = URL.createObjectURL(blob);
+                    } else {
+                        reject(new Error("Failed to load sprite"));
+                    }
+                };
+                xhr.onerror = reject;
+                xhr.send();
+            });
+        }
+
+        if(progressBarContainer) progressBarContainer.style.display = "none";
         
         // Cache sprite raw pixels
         spriteCanvas = document.createElement("canvas");
@@ -506,9 +574,11 @@ async function startCamera(deviceId) {
         // Check and setup exposure controls
         const track = videoStream.getVideoTracks()[0];
         const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+        const videoWrapper = document.querySelector(".video-wrapper");
         
         if (capabilities.exposureMode && capabilities.exposureCompensation) {
             exposureContainer.style.display = "flex";
+            if (videoWrapper) videoWrapper.classList.remove("rounded-bottom");
             exposureSlider.min = capabilities.exposureCompensation.min !== undefined ? capabilities.exposureCompensation.min : -3;
             exposureSlider.max = 0; // limit to negative/0 as requested
             exposureSlider.step = capabilities.exposureCompensation.step || 0.1;
@@ -540,6 +610,7 @@ async function startCamera(deviceId) {
             }
         } else {
             exposureContainer.style.display = "none";
+            if (videoWrapper) videoWrapper.classList.add("rounded-bottom");
         }
     } catch (err) {
         console.error("Error accessing camera:", err);
@@ -574,9 +645,9 @@ function drawOverlay() {
         overlayCtx.globalCompositeOperation = "source-over"; // restore default
     }
 
-    overlayCtx.strokeStyle = "rgba(99, 102, 241, 0.5)";
-    overlayCtx.lineWidth = 2;
-    overlayCtx.strokeRect(bx, by, boxSize, boxSize);
+    // removed purple stroke
+    // overlayCtx.strokeStyle = "rgba(99, 102, 241, 0.5)";
+    // overlayCtx.strokeRect(bx, by, boxSize, boxSize);
 }
 
 // 4. Query Processing & NCC Match
@@ -803,9 +874,15 @@ function runMatchingPipeline() {
         
         overlayCtx.beginPath();
         overlayCtx.arc(drawX, drawY, drawR, 0, 2 * Math.PI);
-        overlayCtx.strokeStyle = "rgba(0, 255, 0, 0.8)";
+        
+        overlayCtx.shadowColor = "rgba(99, 102, 241, 0.8)";
+        overlayCtx.shadowBlur = 10;
+        
+        overlayCtx.strokeStyle = "rgba(99, 102, 241, 0.9)";
         overlayCtx.lineWidth = 2;
         overlayCtx.stroke();
+        
+        overlayCtx.shadowBlur = 0; // Reset
     }
     
     // 5. Build 80x120 Query Grid directly from imgData using M
@@ -1011,13 +1088,21 @@ function renderMatches(topMatches) {
         matchItem.className = `match-item ${index === 0 ? "rank-1" : ""}`;
         matchItem.style.flexDirection = "column";
         
+        const glowOpacity = scorePercentage / 100;
+        const r = Math.round(99 + (16 - 99) * glowOpacity);
+        const g = Math.round(102 + (185 - 102) * glowOpacity);
+        const b = Math.round(241 + (129 - 241) * glowOpacity);
+        matchItem.style.boxShadow = `inset 0 0 20px rgba(${r}, ${g}, ${b}, ${glowOpacity * 0.5})`;
+        
         matchItem.innerHTML = `
-            <div style="display: flex; width: 100%; gap: 0.75rem; align-items: flex-start; margin-bottom: 6px;">
-                <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; width: 100%; align-items: flex-start; margin-bottom: 6px; position: relative;">
+                <div style="flex: 1; min-width: 0; text-align: center; padding: 0 20px;">
                     <div class="match-name" title="${meta.title}" style="width: 100%; font-size: 1.1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.title}</div>
-                    <div class="match-artist" style="width: 100%; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.artist}</div>
+                    <div class="match-artist" style="width: 100%; color: var(--text-muted); font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.artist}</div>
                 </div>
-                <button class="ban-btn" data-name="${match.name}" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; padding: 0; line-height: 1;" title="Temporarily ban this match">✖</button>
+                <button class="ban-btn" data-name="${match.name}" style="position: absolute; right: 0; top: 2px; background: none; border: none; color: #ef4444; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;" title="Temporarily ban this match">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
             
             <div class="match-content" style="display: flex; align-items: center; width: 100%; gap: 0.75rem; justify-content: center;">
@@ -1123,9 +1208,10 @@ maskButtons.forEach(btn => {
             b.classList.remove("primary-btn");
             b.classList.add("outline-btn");
         });
-        e.target.classList.remove("outline-btn");
-        e.target.classList.add("primary-btn");
-        activeMaskName = e.target.getAttribute("data-mask");
+        const targetBtn = e.currentTarget;
+        targetBtn.classList.remove("outline-btn");
+        targetBtn.classList.add("primary-btn");
+        activeMaskName = targetBtn.getAttribute("data-mask");
         drawOverlay();
     });
 });
